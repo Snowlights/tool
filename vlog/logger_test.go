@@ -9,7 +9,7 @@ import (
 func TestInitLogger(t *testing.T) {
 
 	for {
-		Debug(context.Background(), "1", "2", "3")
+		Debug(context.Background(), "1")
 		time.Sleep(time.Second * 5)
 	}
 
