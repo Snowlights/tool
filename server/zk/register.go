@@ -36,3 +36,18 @@ func (c *Register) ensureName(path string) error {
 	}
 	return nil
 }
+
+func (c *Register) Get(ctx context.Context, path string) (string, error) {
+
+	return "", nil
+}
+
+func (c *Register) GetNode(ctx context.Context, path string) []*Node {
+
+	return nil
+}
+
+func (c *Register) RefreshTtl(ctx context.Context, path, val string, ttl time.Duration) error {
+
+	return nil
+}

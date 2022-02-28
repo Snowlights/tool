@@ -9,8 +9,8 @@ import (
 
 func TestClient_Register(t *testing.T) {
 
-	err := DefaulEtcdInstance.Register(context.Background(), "/group/base/censor/1", "127.0.0.1:9909", time.Second*10)
-	err = DefaulEtcdInstance.Register(context.Background(), "/group/base/censor/2", "127.0.0.1:9910", time.Second*10)
+	err := DefaultEtcdInstance.Register(context.Background(), "/group/base/censor/1", "127.0.0.1:9909", time.Second*10)
+	err = DefaultEtcdInstance.Register(context.Background(), "/group/base/censor/2", "127.0.0.1:9910", time.Second*10)
 
 	if err != nil {
 		fmt.Println(err)
@@ -23,7 +23,7 @@ func TestClient_Get(t *testing.T) {
 
 	base := "/group/base/censor/"
 
-	watchChan := DefaulEtcdInstance.Watch(context.Background(), base)
+	watchChan := DefaultEtcdInstance.Watch(context.Background(), base)
 
 	for {
 		msg := <-watchChan
