@@ -14,6 +14,7 @@ const (
 
 const (
 	defaultLogMaxSize = 1024
+	defaultSkip       = 4
 )
 
 var baseLogger *Logger
@@ -28,4 +29,6 @@ type Logger struct {
 
 	ServiceName string
 	Host        string
+
+	skip int
 }

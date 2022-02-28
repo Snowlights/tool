@@ -14,6 +14,7 @@ import (
 func InitLogger(path string, name string, level zapcore.Level, formatType FormatType) *Logger {
 	baseLogger = &Logger{
 		level: level,
+		skip:  defaultSkip,
 	}
 
 	logFile := ""
@@ -68,7 +69,7 @@ func InitLogger(path string, name string, level zapcore.Level, formatType Format
 }
 
 func (l *Logger) checkIsLog(level zapcore.Level) bool {
-	return l.level >= level
+	return l.level <= level
 }
 
 func (l Logger) debug(ctx context.Context, args ...interface{}) {
