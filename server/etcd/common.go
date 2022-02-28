@@ -5,6 +5,11 @@ import (
 	"vtool/vlog"
 )
 
+const (
+	leaseSuccess = "续租成功"
+	character    = ":"
+)
+
 var defaultCluster = []string{"127.0.0.1:2379"}
 
 var DefaulEtcdInstance *Client

@@ -1,8 +1,10 @@
 package vlog
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"runtime"
 	"time"
 )
 
@@ -27,12 +29,33 @@ const (
 	ServiceNameHead = "service"
 	ServiceHost     = "host"
 
+	callerFunction = "caller"
+
 	Body = "body"
 	Msg  = "msg"
+
+	functionName = "?"
+	character    = ":"
 )
 
+func (l Logger) getRuntimeInfo() (function, filename string, lineno int) {
+	function = functionName
+	pc, filename, lineno, ok := runtime.Caller(l.skip)
+	if ok {
+		function = runtime.FuncForPC(pc).Name()
+	}
+	return
+}
+
 func (l Logger) buildHead(level, msg string) []zap.Field {
+
+	_, filename, lineno := l.getRuntimeInfo()
 	kvs := append([]zap.Field{},
+		zap.Field{
+			Key:    callerFunction,
+			Type:   zapcore.StringType,
+			String: fmt.Sprintf("%s%s%d", filename, character, lineno),
+		},
 		zap.Field{
 			Key:    Level,
 			Type:   zapcore.StringType,

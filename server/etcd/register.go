@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"strings"
 	"time"
 	"vtool/vlog"
 )
@@ -31,16 +32,16 @@ func (c *Client) Register(ctx context.Context, path, val string, ttl time.Durati
 		return err
 	}
 
-	go c.keepAlive(ctx, keepAliveRes)
+	go c.keepAlive(ctx, keepAliveRes, path, val)
 	return nil
 }
 
-func (c *Client) keepAlive(ctx context.Context, keepAliveRes <-chan *clientv3.LeaseKeepAliveResponse) {
+func (c *Client) keepAlive(ctx context.Context, keepAliveRes <-chan *clientv3.LeaseKeepAliveResponse, path, val string) {
 	for {
 		select {
 		case ret := <-keepAliveRes:
 			if ret != nil {
-				vlog.Info(ctx, "续租成功", time.Now())
+				vlog.Info(ctx, strings.Join([]string{path, val, leaseSuccess}, character))
 			}
 		}
 	}
