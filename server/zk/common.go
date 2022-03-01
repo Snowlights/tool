@@ -8,9 +8,10 @@ import (
 const (
 	leaseSuccess = "续租成功"
 	character    = ":"
+	slash        = "/"
 )
 
-var defaultCluster = []string{"127.0.0.1:2379"}
+var defaultCluster = []string{"127.0.0.1:2181"}
 
 var DefaultZkInstance *Register
 
