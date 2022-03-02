@@ -9,17 +9,17 @@ import (
 
 func TestNewRegister(t *testing.T) {
 
-	err := DefaultZkInstance.Register(context.Background(), "/group/base/censor/service1", "127.0.0.1:9909", time.Second*10)
+	err := DefaultZkInstance.Register(context.Background(), "/group/base/censor", "127.0.0.1:9909", time.Second*10)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = DefaultZkInstance.Register(context.Background(), "/group/base/censor/service2", "127.0.0.1:9910", time.Second*10)
+	err = DefaultZkInstance.Register(context.Background(), "/group/base/censor", "127.0.0.1:9910", time.Second*10)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = DefaultZkInstance.Register(context.Background(), "/group/base/censor/service3", "127.0.0.1:9911", time.Second*10)
+	err = DefaultZkInstance.Register(context.Background(), "/group/base/censor", "127.0.0.1:9911", time.Second*10)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -33,7 +33,7 @@ func TestRegister_Get(t *testing.T) {
 }
 
 func TestRegister_GetNode(t *testing.T) {
-	DefaultZkInstance.GetNode(context.Background(), "/group/base/censor")
+	fmt.Println(DefaultZkInstance.GetNode(context.Background(), "/group/base/censor"))
 }
 
 func TestRegister_Watch(t *testing.T) {

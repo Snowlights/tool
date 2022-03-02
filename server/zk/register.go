@@ -36,7 +36,7 @@ func (c *Register) Register(ctx context.Context, path, val string, ttl time.Dura
 // recommended to use a special group for maintenance.
 //It is maintained uniformly within the company through work orders or other methods
 func (c *Register) ensureAllPathExit(path string) error {
-	parts := strings.Split(path, slash)
+	parts := strings.Split(path, Slash)
 
 	if len(parts) == 1 {
 		return c.ensurePath(path)
@@ -44,7 +44,7 @@ func (c *Register) ensureAllPathExit(path string) error {
 
 	i := 2
 	for i < len(parts) {
-		err := c.ensurePath(strings.Join(parts[:i], slash))
+		err := c.ensurePath(strings.Join(parts[:i], Slash))
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]*Node, error) {
 	nodeList := make([]*Node, 0, len(res))
 
 	for _, child := range res {
-		fullPath := path + slash + child
+		fullPath := path + Slash + child
 		data, _, err := c.conn.Get(fullPath)
 		if err != nil {
 			if err == zk.ErrNoNode {

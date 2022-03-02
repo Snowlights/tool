@@ -2,13 +2,17 @@ package etcd
 
 import (
 	"context"
+	"errors"
 	"vtool/vlog"
 )
 
 const (
-	leaseSuccess = "续租成功"
+	leaseSuccess = "Lease renewal succeeded"
 	character    = ":"
+	equals       = "="
 )
+
+var lockFailed = errors.New("lock failed")
 
 var defaultCluster = []string{"127.0.0.1:2379"}
 

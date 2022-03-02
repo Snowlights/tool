@@ -22,6 +22,20 @@ func (c *Register) Register(ctx context.Context, path, val string, ttl time.Dura
 		return err
 	}
 
+	tx := kv.Txn(ctx)
+	// Transaction gun lock
+	tx.If(clientv3.Compare(clientv3.CreateRevision(path), equals, 0)).
+		Then(clientv3.OpPut(path, "", clientv3.WithLease(leaseRes.ID))).
+		Else(clientv3.OpGet(path))
+
+	txRes, err := tx.Commit()
+	if err != nil {
+		return err
+	}
+	if !txRes.Succeeded {
+		return lockFailed
+	}
+
 	_, err = kv.Put(ctx, path, val, clientv3.WithLease(leaseRes.ID))
 	if err != nil {
 		return err
@@ -70,10 +84,10 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]*Node, error) {
 
 	nodeList := make([]*Node, 0, len(res.Kvs))
 
-	for k, v := range res.Kvs {
+	for _, v := range res.Kvs {
 		valStr := string(v.Value)
 		node := &Node{
-			key:   string(rune(k)),
+			key:   string(v.Key),
 			val:   valStr,
 			lease: v.Lease,
 		}
