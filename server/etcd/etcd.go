@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func NewClient(cluster []string) (*Client, error) {
+func NewRegister(cluster []string) (*Register, error) {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   cluster,
 		DialTimeout: time.Second * 20,
@@ -15,5 +15,7 @@ func NewClient(cluster []string) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{client: client}, nil
+	register := &Register{client: client}
+	DefaultEtcdInstance = register
+	return register, nil
 }

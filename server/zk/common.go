@@ -1,4 +1,4 @@
-package etcd
+package zk
 
 import (
 	"context"
@@ -8,16 +8,17 @@ import (
 const (
 	leaseSuccess = "续租成功"
 	character    = ":"
+	slash        = "/"
 )
 
-var defaultCluster = []string{"127.0.0.1:2379"}
+var defaultCluster = []string{"127.0.0.1:2181"}
 
-var DefaultEtcdInstance *Register
+var DefaultZkInstance *Register
 
 func init() {
 	ins, err := NewRegister(defaultCluster)
 	if err != nil {
 		vlog.Error(context.Background(), err)
 	}
-	DefaultEtcdInstance = ins
+	DefaultZkInstance = ins
 }

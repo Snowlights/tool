@@ -1,4 +1,4 @@
-package etcd
+package zk
 
 type Node struct {
 	ip   string
@@ -6,6 +6,8 @@ type Node struct {
 
 	key string
 	val string
+
+	lease int64
 }
 
 func (n *Node) Key() string {
@@ -22,4 +24,8 @@ func (n *Node) Ip() string {
 
 func (n *Node) Port() string {
 	return n.port
+}
+
+func (n *Node) Lease() int64 {
+	return n.lease
 }
