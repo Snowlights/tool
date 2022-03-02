@@ -17,5 +17,5 @@ func NewRegister(cluster []string) (*Register, error) {
 
 	register := &Register{client: client}
 	DefaultEtcdInstance = register
-	return register, nil
+	return DefaultEtcdInstance, nil
 }

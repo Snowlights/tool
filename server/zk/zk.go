@@ -12,5 +12,7 @@ func NewRegister(cluster []string) (*Register, error) {
 		return nil, err
 	}
 
-	return &Register{conn: conn}, nil
+	register := &Register{conn: conn}
+	DefaultZkInstance = register
+	return DefaultZkInstance, nil
 }

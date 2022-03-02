@@ -12,11 +12,18 @@ const (
 	ZOOKEEPER RegistrationType = 2
 )
 
+const (
+	defaultTTl = time.Second * 20
+)
+
 type RegisterConfig struct {
 	RegistrationType RegistrationType
-}
 
-type ETCDConfig struct{}
+	ServName string
+	ServAddr string
+
+	Group string
+}
 
 type Register interface {
 	// 获取指定key的值
