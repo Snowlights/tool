@@ -6,9 +6,8 @@ import (
 )
 
 const (
-	leaseSuccess = "续租成功"
-	character    = ":"
-	slash        = "/"
+	character = ":"
+	Slash     = "/"
 )
 
 var defaultCluster = []string{"127.0.0.1:2181"}
