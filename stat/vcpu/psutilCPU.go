@@ -11,8 +11,8 @@ type PsutilCPU struct {
 
 func NewPsutilCPU(interval time.Duration) (CPUMonitor, error) {
 	psutilCPU := &PsutilCPU{interval: interval}
-	defaultPsutilCPUInstance = psutilCPU
-	return defaultPsutilCPUInstance, nil
+	defaultCPUInstance = psutilCPU
+	return defaultCPUInstance, nil
 }
 
 func (p *PsutilCPU) Usage() (float64, error) {

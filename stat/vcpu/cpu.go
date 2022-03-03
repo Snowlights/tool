@@ -7,9 +7,9 @@ func NewCPUMonitor(interval time.Duration) (CPUMonitor, error) {
 }
 
 func Usage() (float64, error) {
-	return defaultPsutilCPUInstance.Usage()
+	return defaultCPUInstance.Usage()
 }
 
 func Info() (*CPU, error) {
-	return defaultPsutilCPUInstance.Info()
+	return defaultCPUInstance.Info()
 }

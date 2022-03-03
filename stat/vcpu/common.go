@@ -19,12 +19,12 @@ const (
 	defaultInterval = 0
 )
 
-var defaultPsutilCPUInstance CPUMonitor
+var defaultCPUInstance CPUMonitor
 
 func init() {
 	ins, err := NewPsutilCPU(defaultInterval)
 	if err != nil {
 		vlog.Error(context.Background(), err)
 	}
-	defaultPsutilCPUInstance = ins
+	defaultCPUInstance = ins
 }
