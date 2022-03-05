@@ -37,26 +37,14 @@ func TestRegister_GetNode(t *testing.T) {
 }
 
 func TestRegister_Watch(t *testing.T) {
-	resChan, eventChan, errChan := DefaultZkInstance.Watch(context.Background(), "/group/base/censor")
-
+	resChan, err := DefaultZkInstance.Watch(context.Background(), "/group/base/censor")
+	if err != nil {
+		fmt.Println(err)
+	}
 	go func() {
 		for {
 			res := <-resChan
-			fmt.Println(res)
-		}
-	}()
-
-	go func() {
-		for {
-			res := <-eventChan
-			fmt.Println(res)
-		}
-	}()
-
-	go func() {
-		for {
-			res := <-errChan
-			fmt.Println(res)
+			fmt.Println("res is ", res)
 		}
 	}()
 

@@ -5,6 +5,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strings"
 	"time"
+	"vtool/server/common"
 	"vtool/vlog"
 )
 
@@ -75,15 +76,14 @@ func (c *Register) Get(ctx context.Context, path string) (string, error) {
 	return "", nil
 }
 
-func (c *Register) GetNode(ctx context.Context, path string) ([]*Node, error) {
+func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, error) {
 
 	res, err := c.client.Get(ctx, path, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
 
-	nodeList := make([]*Node, 0, len(res.Kvs))
-
+	nodeList := make([]common.Node, 0, len(res.Kvs))
 	for _, v := range res.Kvs {
 		valStr := string(v.Value)
 		node := &Node{
@@ -124,6 +124,18 @@ func (c *Register) RefreshTtl(ctx context.Context, path, val string, ttl time.Du
 	return nil
 }
 
-func (c *Register) Watch(ctx context.Context, path string) clientv3.WatchChan {
-	return c.client.Watch(ctx, path, clientv3.WithPrefix())
+func (c *Register) Watch(ctx context.Context, path string) (chan common.Event, error) {
+	watchChan := c.client.Watch(ctx, path, clientv3.WithPrefix())
+	eventChan := make(chan common.Event)
+
+	go func() {
+		for {
+			msg := <-watchChan
+			if len(msg.Events) > 0 {
+				eventChan <- Event{common.ChildrenChanged}
+			}
+		}
+	}()
+
+	return eventChan, nil
 }

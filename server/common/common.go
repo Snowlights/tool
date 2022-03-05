@@ -1,22 +1,27 @@
-package server
+package common
 
 import (
 	"context"
 	"time"
 )
 
-type RegistrationType int64
+type (
+	RegistrationType int64
+	EventType        int64
+)
 
 const (
 	ETCD      RegistrationType = 1
 	ZOOKEEPER RegistrationType = 2
+
+	ChildrenChanged EventType = 1
 )
 
 const (
-	defaultTTl = time.Second * 20
+	DefaultTTl = time.Second * 10
 
-	_defaultID = "-1"
-	retryTime  = 4
+	DefaultID = "-1"
+	RetryTime = 4
 )
 
 type RegisterConfig struct {
@@ -36,4 +41,19 @@ type Register interface {
 	// Execute registration, and the heartbeat will be maintained after registration.
 	// When calling registration, the current value will be set to the node
 	Register(ctx context.Context, path, val string, ttl time.Duration) error
+	// get all node
+	GetNode(ctx context.Context, path string) ([]Node, error)
+	// event
+	Watch(ctx context.Context, path string) (chan Event, error)
+}
+
+type Node interface {
+	Key() string
+	Val() string
+	Ip() string
+	Port() string
+}
+
+type Event interface {
+	Event() EventType
 }

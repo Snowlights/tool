@@ -7,13 +7,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"vtool/server/common"
 	"vtool/server/etcd"
 	"vtool/server/zk"
 	"vtool/vlog"
 	"vtool/vnet"
 )
 
-func RegisterService(ctx context.Context, config *RegisterConfig) error {
+func RegisterService(ctx context.Context, config *common.RegisterConfig) error {
 
 	// todo make group to os.env config
 	path := config.Group + zk.Slash + config.ServName
@@ -22,24 +23,24 @@ func RegisterService(ctx context.Context, config *RegisterConfig) error {
 		return err
 	}
 
-	var engine Register
+	var engine common.Register
 	switch config.RegistrationType {
-	case ETCD:
+	case common.ETCD:
 		engine = etcd.DefaultEtcdInstance
-	case ZOOKEEPER:
+	case common.ZOOKEEPER:
 		engine = zk.DefaultZkInstance
 	default:
-		return UnSupportedRegistrationType
+		return common.UnSupportedRegistrationType
 	}
 
 	return retryRegister(ctx, engine, config.RegistrationType, path, servAddr)
 }
 
-func retryRegister(ctx context.Context, engine Register, registrationType RegistrationType, path, servAddr string) error {
+func retryRegister(ctx context.Context, engine common.Register, registrationType common.RegistrationType, path, servAddr string) error {
 
 	rand.Seed(time.Now().Unix())
 	retry := 0
-	for retry < retryTime {
+	for retry < common.RetryTime {
 		s := rand.Intn(100)
 		time.Sleep(time.Millisecond * time.Duration(s))
 
@@ -50,21 +51,21 @@ func retryRegister(ctx context.Context, engine Register, registrationType Regist
 		}
 		servPath := path + zk.Slash + id
 
-		err = engine.Register(ctx, servPath, servAddr, defaultTTl)
+		err = engine.Register(ctx, servPath, servAddr, common.DefaultTTl)
 		if err == nil {
 			return nil
 		}
 		retry++
 	}
 
-	return RegisterFailed
+	return common.RegisterFailed
 }
 
-func calculateCurrentServID(ctx context.Context, registrationType RegistrationType, path string) (string, error) {
+func calculateCurrentServID(ctx context.Context, registrationType common.RegistrationType, path string) (string, error) {
 	fun := "calculateCurrentServID --> "
 	idList := make([]int, 0)
 	switch registrationType {
-	case ETCD:
+	case common.ETCD:
 		nodes, err := etcd.DefaultEtcdInstance.GetNode(ctx, path)
 		if err != nil {
 			return "", err
@@ -78,7 +79,7 @@ func calculateCurrentServID(ctx context.Context, registrationType RegistrationTy
 				idList = append(idList, idInt)
 			}
 		}
-	case ZOOKEEPER:
+	case common.ZOOKEEPER:
 		nodes, err := zk.DefaultZkInstance.GetNode(ctx, path)
 		if err != nil {
 			return "", err
@@ -93,7 +94,7 @@ func calculateCurrentServID(ctx context.Context, registrationType RegistrationTy
 			}
 		}
 	default:
-		return _defaultID, UnSupportedRegistrationType
+		return common.DefaultID, common.UnSupportedRegistrationType
 	}
 
 	sort.Ints(idList)
