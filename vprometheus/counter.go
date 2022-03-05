@@ -1,8 +1,9 @@
 package vprometheus
 
 import (
-	"fmt"
+	"context"
 	"github.com/prometheus/client_golang/prometheus"
+	"vtool/vlog"
 )
 
 type counterVec struct {
@@ -10,7 +11,7 @@ type counterVec struct {
 	lvs LabelValues
 }
 
-func NewCounter(config *CounterVec) Counter {
+func NewCounter(config *VecOpts) Counter {
 	cv := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: config.NameSpace,
 		Subsystem: config.SubSystem,
@@ -25,19 +26,19 @@ func NewCounter(config *CounterVec) Counter {
 // Inc Inc increments the counter by 1.
 func (c *counterVec) Inc() {
 	if err := c.lvs.Check(); err != nil {
-		fmt.Printf("counter label value invalid:%s\n", err.Error())
+		vlog.Error(context.Background(), "counter label value invalid:%s\n", err.Error())
 		return
 	}
 	c.cv.With(makePrometheusLabels(c.lvs...)).Inc()
 }
 
 // Add adds the given value to the counter. It panics if the value is < 0
-func (c *counterVec) Add(delta float64) {
+func (c *counterVec) Add(data float64) {
 	if err := c.lvs.Check(); err != nil {
-		fmt.Printf("counter label value invalid:%s\n", err.Error())
+		vlog.Error(context.Background(), "counter label value invalid:%s\n", err.Error())
 		return
 	}
-	c.cv.With(makePrometheusLabels(c.lvs...)).Add(delta)
+	c.cv.With(makePrometheusLabels(c.lvs...)).Add(data)
 }
 
 // With implements Counter, labels will see as a key

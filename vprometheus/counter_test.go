@@ -28,7 +28,7 @@ func TestNewCounter(t *testing.T) {
 	namespace, subsystem, name := "namespace", "subsystem", "name"
 	re := regexp.MustCompile(namespace + `_` + subsystem + `_` + name + `{a="a-value",b="b-value"} ([0-9\.]+)`)
 
-	counter := NewCounter(&CounterVec{
+	counter := NewCounter(&VecOpts{
 		NameSpace:  namespace,
 		SubSystem:  subsystem,
 		Name:       name,

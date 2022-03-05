@@ -1,6 +1,6 @@
 package vprometheus
 
-type CounterVec struct {
+type VecOpts struct {
 	NameSpace  string
 	SubSystem  string
 	Name       string
@@ -10,6 +10,15 @@ type CounterVec struct {
 
 type Counter interface {
 	Inc()
-	Add(data float64)
-	With(labelValues ...string) Counter
+	Add(float64)
+	With(...string) Counter
+}
+
+type Gauge interface {
+	Add(float64)
+	Sub(float64)
+	Set(float64)
+	Inc()
+	Dec()
+	With(...string) Gauge
 }
