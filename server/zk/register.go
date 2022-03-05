@@ -5,6 +5,7 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	"strings"
 	"time"
+	"vtool/server/common"
 )
 
 type Register struct {
@@ -77,15 +78,14 @@ func (c *Register) Get(ctx context.Context, path string) (string, error) {
 	return string(res), nil
 }
 
-func (c *Register) GetNode(ctx context.Context, path string) ([]*Node, error) {
+func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, error) {
 
 	res, _, err := c.conn.Children(path)
 	if err != nil {
 		return nil, err
 	}
 
-	nodeList := make([]*Node, 0, len(res))
-
+	nodeList := make([]common.Node, 0, len(res))
 	for _, child := range res {
 		fullPath := path + Slash + child
 		data, _, err := c.conn.Get(fullPath)
@@ -111,9 +111,9 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]*Node, error) {
 	return nodeList, nil
 }
 
-func (c *Register) Watch(ctx context.Context, path string) (chan []string, chan zk.Event, chan error) {
+func (c *Register) Watch(ctx context.Context, path string) (chan common.Event, error) {
 	snapshots := make(chan []string)
-	eventChan := make(chan zk.Event)
+	eventChan := make(chan common.Event)
 	errors := make(chan error)
 
 	go func() {
@@ -123,16 +123,18 @@ func (c *Register) Watch(ctx context.Context, path string) (chan []string, chan 
 				errors <- err
 				return
 			}
+			// todo if you would use snapshot you can do something here
 			snapshots <- snapshot
 			evt := <-events
 			if evt.Err != nil {
 				errors <- evt.Err
 				return
 			}
-			eventChan <- evt
+			eventChan <- Event{common.ChildrenChanged}
 		}
 	}()
-	return snapshots, eventChan, errors
+
+	return eventChan, nil
 }
 
 // TTL node is added in version 3.5.5
