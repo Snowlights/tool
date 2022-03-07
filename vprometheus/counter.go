@@ -26,7 +26,7 @@ func NewCounter(config *VecOpts) Counter {
 // Inc Inc increments the counter by 1.
 func (c *counterVec) Inc() {
 	if err := c.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "counter label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "counter label value invalid:%s", err.Error())
 		return
 	}
 	c.cv.With(makePrometheusLabels(c.lvs...)).Inc()
@@ -35,7 +35,7 @@ func (c *counterVec) Inc() {
 // Add adds the given value to the counter. It panics if the value is < 0
 func (c *counterVec) Add(data float64) {
 	if err := c.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "counter label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "counter label value invalid:%s", err.Error())
 		return
 	}
 	c.cv.With(makePrometheusLabels(c.lvs...)).Add(data)

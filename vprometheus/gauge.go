@@ -25,7 +25,7 @@ func NewGauge(config *VecOpts) Gauge {
 
 func (g *gaugeVec) Add(data float64) {
 	if err := g.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "gauge label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "gauge label value invalid:%s", err.Error())
 		return
 	}
 	g.gv.With(makePrometheusLabels(g.lvs...)).Add(data)
@@ -33,7 +33,7 @@ func (g *gaugeVec) Add(data float64) {
 
 func (g *gaugeVec) Sub(data float64) {
 	if err := g.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "gauge label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "gauge label value invalid:%s", err.Error())
 		return
 	}
 	g.gv.With(makePrometheusLabels(g.lvs...)).Sub(data)
@@ -41,7 +41,7 @@ func (g *gaugeVec) Sub(data float64) {
 
 func (g *gaugeVec) Set(data float64) {
 	if err := g.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "gauge label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "gauge label value invalid:%s", err.Error())
 		return
 	}
 	g.gv.With(makePrometheusLabels(g.lvs...)).Set(data)
@@ -49,7 +49,7 @@ func (g *gaugeVec) Set(data float64) {
 
 func (g *gaugeVec) Inc() {
 	if err := g.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "gauge label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "gauge label value invalid:%s", err.Error())
 		return
 	}
 	g.gv.With(makePrometheusLabels(g.lvs...)).Inc()
@@ -57,7 +57,7 @@ func (g *gaugeVec) Inc() {
 
 func (g *gaugeVec) Dec() {
 	if err := g.lvs.Check(); err != nil {
-		vlog.Error(context.Background(), "gauge label value invalid:%s\n", err.Error())
+		vlog.ErrorF(context.Background(), "gauge label value invalid:%s", err.Error())
 		return
 	}
 	g.gv.With(makePrometheusLabels(g.lvs...)).Dec()

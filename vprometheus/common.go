@@ -22,3 +22,8 @@ type Gauge interface {
 	Dec()
 	With(...string) Gauge
 }
+
+type Histogram interface {
+	Observe(float64)
+	With(...string) Histogram
+}
