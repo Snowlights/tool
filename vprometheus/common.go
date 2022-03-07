@@ -6,6 +6,7 @@ type VecOpts struct {
 	Name       string
 	Help       string
 	LabelNames []string
+	Buckets    []float64
 }
 
 type Counter interface {

@@ -20,6 +20,7 @@ func NewHistogram(config *VecOpts) Histogram {
 		Subsystem: config.SubSystem,
 		Name:      config.Name,
 		Help:      config.Help,
+		Buckets:   config.Buckets,
 	}, config.LabelNames)
 
 	prometheus.MustRegister(hv)
