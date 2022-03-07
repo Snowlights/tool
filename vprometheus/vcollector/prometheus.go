@@ -1,0 +1,5 @@
+package vcollector
+
+func NewCollector() {
+
+}

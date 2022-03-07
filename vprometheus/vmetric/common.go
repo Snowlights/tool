@@ -1,4 +1,4 @@
-package vprometheus
+package vmetric
 
 type VecOpts struct {
 	NameSpace  string

@@ -1,4 +1,4 @@
-package vprometheus
+package vmetric
 
 import (
 	"context"

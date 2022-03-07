@@ -1,4 +1,4 @@
-package vprometheus
+package vmetric
 
 import (
 	"fmt"
@@ -41,8 +41,8 @@ func TestNewHistogram(t *testing.T) {
 	}).With("a", "1")
 
 	SetHistogram(histogram)
+	fmt.Println(scrape())
 	SetHistogram(histogram)
-
 	fmt.Println(scrape())
 }
 
