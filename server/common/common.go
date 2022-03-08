@@ -21,7 +21,7 @@ const (
 	DefaultTTl = time.Second * 10
 
 	DefaultID = "-1"
-	RetryTime = 4
+	// RetryTime = 4
 )
 
 type RegisterConfig struct {

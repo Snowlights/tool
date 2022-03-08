@@ -79,7 +79,7 @@ func (c *Register) Get(ctx context.Context, path string) (string, error) {
 }
 
 func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, error) {
-
+	c.ensurePath(path)
 	res, _, err := c.conn.Children(path)
 	if err != nil {
 		return nil, err

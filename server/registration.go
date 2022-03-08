@@ -40,9 +40,8 @@ func retryRegister(ctx context.Context, engine common.Register, registrationType
 
 	rand.Seed(time.Now().Unix())
 	retry := 0
-	for retry < common.RetryTime {
-		s := rand.Intn(100)
-		time.Sleep(time.Millisecond * time.Duration(s))
+	for retry = 0; ; retry++ {
+		time.Sleep(common.DefaultTTl)
 
 		id, err := calculateCurrentServID(ctx, registrationType, path)
 		if err != nil {
@@ -53,12 +52,14 @@ func retryRegister(ctx context.Context, engine common.Register, registrationType
 
 		err = engine.Register(ctx, servPath, servAddr, common.DefaultTTl)
 		if err == nil {
+			vlog.InfoF(ctx, servPath, servAddr, "register success")
 			return nil
+		} else {
+			vlog.ErrorF(ctx, servPath, servAddr, "register failed error is %s", err.Error())
 		}
 		retry++
 	}
 
-	return common.RegisterFailed
 }
 
 func calculateCurrentServID(ctx context.Context, registrationType common.RegistrationType, path string) (string, error) {
