@@ -11,7 +11,6 @@ import (
 
 func TestRegisterService(t *testing.T) {
 	for i := 0; i < 3; i++ {
-
 		err := RegisterService(context.Background(), &common.RegisterConfig{
 			RegistrationType: common.ZOOKEEPER,
 			ServName:         "censor",

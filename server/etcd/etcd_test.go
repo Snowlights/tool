@@ -42,15 +42,15 @@ func TestClient_Get(t *testing.T) {
 
 	base := "/group/base/censor"
 
-	// fmt.Println(DefaultEtcdInstance.GetNode(context.Background(), base))
-	watchChan, err := DefaultEtcdInstance.Watch(context.Background(), base)
-	if err != nil {
-
-	}
-	for {
-		msg := <-watchChan
-		fmt.Println(msg)
-		// todo
-	}
+	fmt.Println(DefaultEtcdInstance.GetNode(context.Background(), base))
+	//watchChan, err := DefaultEtcdInstance.Watch(context.Background(), base)
+	//if err != nil {
+	//
+	//}
+	//for {
+	//	msg := <-watchChan
+	//	fmt.Println(msg)
+	//	// todo
+	//}
 
 }

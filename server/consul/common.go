@@ -12,6 +12,8 @@ type RegisterConfig struct {
 }
 
 const (
+	ConsulNamespace = "consul"
+
 	defaultHost  = "127.0.0.1"
 	defaultPort  = "8500"
 	defaultToken = "1f8afae5-32e7-c38f-eaec-497dd0532b88"

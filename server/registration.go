@@ -12,17 +12,12 @@ import (
 	"vtool/server/etcd"
 	"vtool/server/zk"
 	"vtool/vlog"
-	"vtool/vnet"
 )
 
 func RegisterService(ctx context.Context, config *common.RegisterConfig) error {
 
 	// todo make group to os.env config
 	path := config.Group + common.Slash + config.ServName
-	servAddr, err := vnet.GetServAddr(config.ServAddr)
-	if err != nil {
-		return err
-	}
 
 	var engine common.Register
 	switch config.RegistrationType {
@@ -37,7 +32,7 @@ func RegisterService(ctx context.Context, config *common.RegisterConfig) error {
 		return common.UnSupportedRegistrationType
 	}
 
-	return retryRegister(ctx, engine, config.RegistrationType, path, servAddr)
+	return retryRegister(ctx, engine, config.RegistrationType, path, config.ServAddr)
 }
 
 func retryRegister(ctx context.Context, engine common.Register, registrationType common.RegistrationType, path, servAddr string) error {
@@ -45,11 +40,10 @@ func retryRegister(ctx context.Context, engine common.Register, registrationType
 	rand.Seed(time.Now().Unix())
 	retry := 0
 	for retry = 0; ; retry++ {
-		time.Sleep(common.DefaultTTl)
-
 		id, err := calculateCurrentServID(ctx, registrationType, path)
 		if err != nil {
 			retry++
+			time.Sleep(common.DefaultTTl)
 			continue
 		}
 		servPath := path + common.Slash + id
@@ -62,6 +56,7 @@ func retryRegister(ctx context.Context, engine common.Register, registrationType
 			vlog.ErrorF(ctx, servPath, servAddr, "register failed error is %s", err.Error())
 		}
 		retry++
+		time.Sleep(common.DefaultTTl)
 	}
 
 }

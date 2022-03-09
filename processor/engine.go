@@ -8,6 +8,11 @@ import (
 	"vtool/vnet"
 )
 
+type Processor interface {
+	Prepare() error
+	Engine() (string, interface{})
+}
+
 type EnginePower interface {
 	Power(context.Context, string) error
 }

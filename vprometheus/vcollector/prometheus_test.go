@@ -1,11 +1,15 @@
 package vcollector
 
 import (
+	"context"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"testing"
 	"time"
+	"vtool/server/common"
+	"vtool/server/consul"
+	"vtool/vnet"
 	"vtool/vprometheus/vmetric"
 )
 
@@ -85,4 +89,20 @@ func TestNewCollector3(t *testing.T) {
 		}
 	}()
 
+	listen, err := vnet.ListenServAddr(context.Background(), "")
+	if err != nil {
+		return
+	}
+
+	consul.DefaultConsulInstance.Register(context.Background(), "consul/group/base/censor/1", listen.Addr().String(), common.DefaultTTl)
+
+	http.Handle("/health", MyHandler{})
+	http.Handle("/metrics", promhttp.Handler())
+	http.Serve(listen, nil)
+}
+
+type MyHandler struct{}
+
+func (MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("heath check success!"))
 }
