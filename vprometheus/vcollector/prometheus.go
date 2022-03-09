@@ -20,6 +20,12 @@ const DefaultMetricPath = "/metric"
 
 type MetricProcessor struct{}
 
+func (mp *MetricProcessor) Prepare() error {
+	// set default metric
+
+	return nil
+}
+
 func (mp *MetricProcessor) Engine() (string, interface{}) {
 
 	engine := gin.New()
