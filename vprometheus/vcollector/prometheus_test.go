@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 	"vtool/vnet"
-	"vtool/vprometheus/consul"
 	"vtool/vprometheus/vmetric"
 )
 
@@ -90,18 +89,10 @@ func TestNewCollector3(t *testing.T) {
 		}
 	}()
 
-	listen, _, err := vnet.ListenServAddr(context.Background(), ":")
+	listen, err := vnet.ListenServAddr(context.Background(), ":")
 	if err != nil {
 		return
 	}
-
-	c, err := consul.NewConsulServiceRegistry("127.0.0.1", 8500, "")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	c.Register("consul/group/base/censor/1", listen.Addr().String())
 
 	http.Handle("/health", MyHandler{})
 	http.Handle("/metrics", promhttp.Handler())

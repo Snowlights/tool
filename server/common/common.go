@@ -11,6 +11,13 @@ type (
 )
 
 const (
+	Colon      = ":"
+	Equals     = "="
+	Slash      = "/"
+	HttpPrefix = "http://"
+)
+
+const (
 	ETCD      RegistrationType = 1
 	ZOOKEEPER RegistrationType = 2
 
@@ -21,7 +28,6 @@ const (
 	DefaultTTl = time.Second * 10
 
 	DefaultID = "-1"
-	// RetryTime = 4
 )
 
 type RegisterConfig struct {

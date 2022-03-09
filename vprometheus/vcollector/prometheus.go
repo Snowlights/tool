@@ -10,6 +10,8 @@ package vcollector
 // Zookeeper only supports these two kinds of structured data,
 // but we implement service registration and discovery by ourselves, so we don't use ZK for service index statistics
 
+const DefaultMetricPath = "/metric"
+
 func NewCollector() {
 
 }

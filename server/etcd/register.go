@@ -25,7 +25,7 @@ func (c *Register) Register(ctx context.Context, path, val string, ttl time.Dura
 
 	tx := kv.Txn(ctx)
 	// Transaction gun lock
-	tx.If(clientv3.Compare(clientv3.CreateRevision(path), equals, 0)).
+	tx.If(clientv3.Compare(clientv3.CreateRevision(path), common.Equals, 0)).
 		Then(clientv3.OpPut(path, "", clientv3.WithLease(leaseRes.ID))).
 		Else(clientv3.OpGet(path))
 
@@ -56,7 +56,7 @@ func (c *Register) keepAlive(ctx context.Context, keepAliveRes <-chan *clientv3.
 		select {
 		case ret := <-keepAliveRes:
 			if ret != nil {
-				vlog.Info(ctx, strings.Join([]string{path, val, leaseSuccess}, character))
+				vlog.Info(ctx, strings.Join([]string{path, val, leaseSuccess}, common.Colon))
 			}
 		}
 	}
@@ -91,7 +91,7 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, err
 			val:   valStr,
 			lease: v.Lease,
 		}
-		parts := strings.Split(valStr, character)
+		parts := strings.Split(valStr, common.Colon)
 		if len(parts) == 2 {
 			node.ip = parts[0]
 			node.port = parts[1]

@@ -17,7 +17,7 @@ import (
 func RegisterService(ctx context.Context, config *common.RegisterConfig) error {
 
 	// todo make group to os.env config
-	path := config.Group + zk.Slash + config.ServName
+	path := config.Group + common.Slash + config.ServName
 	servAddr, err := vnet.GetServAddr(config.ServAddr)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func retryRegister(ctx context.Context, engine common.Register, registrationType
 			retry++
 			continue
 		}
-		servPath := path + zk.Slash + id
+		servPath := path + common.Slash + id
 
 		err = engine.Register(ctx, servPath, servAddr, common.DefaultTTl)
 		if err == nil {
@@ -72,7 +72,7 @@ func calculateCurrentServID(ctx context.Context, registrationType common.Registr
 			return "", err
 		}
 		for _, n := range nodes {
-			id := n.Key()[strings.LastIndex(n.Key(), zk.Slash)+1:]
+			id := n.Key()[strings.LastIndex(n.Key(), common.Slash)+1:]
 			idInt, err := strconv.Atoi(id)
 			if err != nil || idInt < 0 {
 				vlog.ErrorF(ctx, "%s id error key:%s", fun, n.Key())
@@ -86,7 +86,7 @@ func calculateCurrentServID(ctx context.Context, registrationType common.Registr
 			return "", err
 		}
 		for _, n := range nodes {
-			id := n.Key()[strings.LastIndex(n.Key(), zk.Slash)+1:]
+			id := n.Key()[strings.LastIndex(n.Key(), common.Slash)+1:]
 			idInt, err := strconv.Atoi(id)
 			if err != nil || idInt < 0 {
 				vlog.ErrorF(ctx, "%s id error key:%s", fun, n.Key())

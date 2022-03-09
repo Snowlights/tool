@@ -5,10 +5,16 @@ import (
 	"vtool/server/common"
 )
 
-func NewRegister(cluster []string) (*Register, error) {
+func NewRegister(regConfig *RegisterConfig) (*Register, error) {
+
+	timeOut := common.DefaultTTl
+	if regConfig.TimeOut > 0 {
+		timeOut = regConfig.TimeOut
+	}
+
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   cluster,
-		DialTimeout: common.DefaultTTl,
+		Endpoints:   regConfig.Cluster,
+		DialTimeout: timeOut,
 	})
 
 	if err != nil {

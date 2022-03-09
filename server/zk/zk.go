@@ -5,8 +5,12 @@ import (
 	"vtool/server/common"
 )
 
-func NewRegister(cluster []string) (*Register, error) {
-	conn, _, err := zk.Connect(cluster, common.DefaultTTl)
+func NewRegister(regConfig *RegisterConfig) (*Register, error) {
+	timeOut := common.DefaultTTl
+	if regConfig.TimeOut > 0 {
+		timeOut = regConfig.TimeOut
+	}
+	conn, _, err := zk.Connect(regConfig.Cluster, timeOut)
 
 	if err != nil {
 		return nil, err
