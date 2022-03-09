@@ -1,13 +1,11 @@
 package vcollector
 
 import (
-	"context"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"testing"
 	"time"
-	"vtool/vnet"
 	"vtool/vprometheus/vmetric"
 )
 
@@ -31,8 +29,6 @@ func TestNewCollector(t *testing.T) {
 	}()
 
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
-
 }
 
 func TestNewCollector2(t *testing.T) {
@@ -89,18 +85,4 @@ func TestNewCollector3(t *testing.T) {
 		}
 	}()
 
-	listen, err := vnet.ListenServAddr(context.Background(), ":")
-	if err != nil {
-		return
-	}
-
-	http.Handle("/health", MyHandler{})
-	http.Handle("/metrics", promhttp.Handler())
-	http.Serve(listen, nil)
-}
-
-type MyHandler struct{}
-
-func (MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("heath check success!"))
 }

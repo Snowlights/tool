@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 	"vtool/server/common"
+	"vtool/server/consul"
 	"vtool/server/etcd"
 	"vtool/server/zk"
 	"vtool/vlog"
@@ -29,6 +30,9 @@ func RegisterService(ctx context.Context, config *common.RegisterConfig) error {
 		engine = etcd.DefaultEtcdInstance
 	case common.ZOOKEEPER:
 		engine = zk.DefaultZkInstance
+	case common.Consul:
+		// only for metric collection
+		engine = consul.DefaultConsulInstance
 	default:
 		return common.UnSupportedRegistrationType
 	}

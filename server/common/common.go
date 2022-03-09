@@ -20,6 +20,7 @@ const (
 const (
 	ETCD      RegistrationType = 1
 	ZOOKEEPER RegistrationType = 2
+	Consul    RegistrationType = 3
 
 	ChildrenChanged EventType = 1
 )
