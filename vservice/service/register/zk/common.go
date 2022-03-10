@@ -1,15 +1,10 @@
-package etcd
+package zk
 
 import (
 	"context"
-	"errors"
 	"time"
-	"vtool/server/common"
 	"vtool/vlog"
-)
-
-const (
-	leaseSuccess = "Lease renewal succeeded"
+	"vtool/vservice/common"
 )
 
 type RegisterConfig struct {
@@ -17,11 +12,9 @@ type RegisterConfig struct {
 	TimeOut time.Duration
 }
 
-var lockFailed = errors.New("lock failed")
+var defaultCluster = []string{"127.0.0.1:2181"}
 
-var defaultCluster = []string{"127.0.0.1:2379"}
-
-var DefaultEtcdInstance *Register
+var DefaultZkInstance *Register
 
 func init() {
 	ins, err := NewRegister(&RegisterConfig{
@@ -31,5 +24,5 @@ func init() {
 	if err != nil {
 		vlog.Error(context.Background(), err)
 	}
-	DefaultEtcdInstance = ins
+	DefaultZkInstance = ins
 }

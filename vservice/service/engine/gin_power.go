@@ -1,4 +1,4 @@
-package processor
+package engine
 
 import (
 	"context"
@@ -6,22 +6,14 @@ import (
 	"net/http"
 	"vtool/vlog"
 	"vtool/vnet"
+	"vtool/vservice/common"
 )
 
-type Processor interface {
-	Prepare() error
-	Engine() (string, interface{})
-}
-
-type EnginePower interface {
-	Power(context.Context, string) error
-}
-
-type ginPower struct {
+type GinPower struct {
 	c *gin.Engine
 }
 
-func (c *ginPower) Power(ctx context.Context, addr string) (string, error) {
+func (c *GinPower) Power(ctx context.Context, addr string) (string, error) {
 
 	listener, err := vnet.ListenServAddr(ctx, addr)
 	if err != nil {
@@ -37,4 +29,8 @@ func (c *ginPower) Power(ctx context.Context, addr string) (string, error) {
 	}()
 
 	return listener.Addr().String(), nil
+}
+
+func (c *GinPower) Type() string {
+	return common.ServiceTypeGin
 }

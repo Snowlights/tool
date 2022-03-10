@@ -1,4 +1,4 @@
-package processor
+package common
 
 type ServiceInfo struct {
 	Type string `json:"type"`

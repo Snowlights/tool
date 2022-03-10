@@ -1,4 +1,4 @@
-package server
+package register
 
 import (
 	"context"
@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"vtool/server/common"
-	"vtool/server/consul"
-	"vtool/server/etcd"
-	"vtool/server/zk"
 	"vtool/vlog"
+	"vtool/vservice/common"
+	"vtool/vservice/service/register/consul"
+	"vtool/vservice/service/register/etcd"
+	"vtool/vservice/service/register/zk"
 )
 
 func RegisterService(ctx context.Context, config *common.RegisterConfig) error {

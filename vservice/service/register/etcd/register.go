@@ -5,8 +5,8 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strings"
 	"time"
-	"vtool/server/common"
 	"vtool/vlog"
+	"vtool/vservice/common"
 )
 
 type Register struct {
@@ -87,14 +87,8 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, err
 	for _, v := range res.Kvs {
 		valStr := string(v.Value)
 		node := &Node{
-			key:   string(v.Key),
-			val:   valStr,
-			lease: v.Lease,
-		}
-		parts := strings.Split(valStr, common.Colon)
-		if len(parts) == 2 {
-			node.ip = parts[0]
-			node.port = parts[1]
+			key: string(v.Key),
+			val: valStr,
 		}
 		nodeList = append(nodeList, node)
 	}

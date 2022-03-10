@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"vtool/server/common"
+	"vtool/vservice/common"
 )
 
-// consul agent -server -ui -bootstrap-expect=1 -client=0.0.0.0 -bind {ip addr} -data-dir={data dir} >> {log dir}
+// consul agent -vservice -ui -bootstrap-expect=1 -client=0.0.0.0 -bind {ip addr} -data-dir={data dir} >> {log dir}
 type Register struct {
 	client *api.Client
 	check  api.AgentServiceCheck

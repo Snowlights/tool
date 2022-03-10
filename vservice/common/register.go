@@ -57,8 +57,6 @@ type Register interface {
 type Node interface {
 	Key() string
 	Val() string
-	Ip() string
-	Port() string
 }
 
 type Event interface {

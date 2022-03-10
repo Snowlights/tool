@@ -1,4 +1,4 @@
-package processor
+package service
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"testing"
 	"time"
-	"vtool/server/common"
 	"vtool/vprometheus/vmetric"
+	"vtool/vservice/common"
 )
 
 type TestProcessor struct{}
@@ -54,10 +54,10 @@ func TestServ(t *testing.T) {
 	}()
 
 	err := Serv(context.Background(), &common.RegisterConfig{
-		RegistrationType: common.ETCD,
+		RegistrationType: common.ZOOKEEPER,
 		ServName:         "censor",
 		Group:            "/group/base",
-	}, map[string]Processor{
+	}, map[string]common.Processor{
 		"test": &TestProcessor{},
 	})
 	if err != nil {

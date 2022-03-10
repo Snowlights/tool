@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
-	"vtool/server/consul"
+	"vtool/vservice/service/register/consul"
 )
 
 //Nerve SD configurations allow retrieving scrape targets from [AirBnB's Nerve]

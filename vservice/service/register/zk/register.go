@@ -5,7 +5,7 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	"strings"
 	"time"
-	"vtool/server/common"
+	"vtool/vservice/common"
 )
 
 type Register struct {
@@ -99,11 +99,6 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, err
 		node := &Node{
 			key: fullPath,
 			val: valStr,
-		}
-		parts := strings.Split(valStr, common.Colon)
-		if len(parts) == 2 {
-			node.ip = parts[0]
-			node.port = parts[1]
 		}
 		nodeList = append(nodeList, node)
 	}

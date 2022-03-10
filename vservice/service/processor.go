@@ -1,21 +1,22 @@
-package processor
+package service
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
-	"vtool/server"
-	"vtool/server/common"
-	"vtool/server/consul"
 	"vtool/vlog"
 	"vtool/vprometheus/vcollector"
+	"vtool/vservice/common"
+	"vtool/vservice/service/engine"
+	register2 "vtool/vservice/service/register"
+	"vtool/vservice/service/register/consul"
 )
 
-func Serv(ctx context.Context, registerConfig *common.RegisterConfig, props map[string]Processor) error {
+func Serv(ctx context.Context, registerConfig *common.RegisterConfig, props map[string]common.Processor) error {
 	err := serverIns(ctx, registerConfig, props)
 	if err != nil {
 		return err
@@ -37,7 +38,7 @@ func awaitSignal() {
 			vlog.InfoF(ctx, "receive a signal:%s", s.String())
 
 			if s.String() == syscall.SIGTERM.String() {
-				vlog.InfoF(ctx, "receive a signal: %s, stop server", s.String())
+				vlog.InfoF(ctx, "receive a signal: %s, stop vservice", s.String())
 				Stop()
 				<-(chan int)(nil)
 			}
@@ -49,7 +50,7 @@ func Stop() {
 	// clearRegisterInfos
 }
 
-func serverIns(ctx context.Context, registerConfig *common.RegisterConfig, props map[string]Processor) error {
+func serverIns(ctx context.Context, registerConfig *common.RegisterConfig, props map[string]common.Processor) error {
 
 	// power service
 	serv, err := powerServices(ctx, props)
@@ -67,7 +68,7 @@ func serverIns(ctx context.Context, registerConfig *common.RegisterConfig, props
 	return nil
 }
 
-func register(ctx context.Context, registerConfig *common.RegisterConfig, serv map[string]*ServiceInfo) error {
+func register(ctx context.Context, registerConfig *common.RegisterConfig, serv map[string]*common.ServiceInfo) error {
 	servStr, err := json.Marshal(serv)
 	if err != nil {
 		return err
@@ -80,7 +81,7 @@ func register(ctx context.Context, registerConfig *common.RegisterConfig, serv m
 		Group:            registerConfig.Group,
 	}
 
-	err = server.RegisterService(ctx, regConfig)
+	err = register2.RegisterService(ctx, regConfig)
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func register(ctx context.Context, registerConfig *common.RegisterConfig, serv m
 
 func initMetric(ctx context.Context, registerConfig *common.RegisterConfig) error {
 
-	serv, err := powerServices(ctx, map[string]Processor{
+	serv, err := powerServices(ctx, map[string]common.Processor{
 		"metric": &vcollector.MetricProcessor{},
 	})
 	if err != nil {
@@ -110,24 +111,24 @@ func initMetric(ctx context.Context, registerConfig *common.RegisterConfig) erro
 	return nil
 }
 
-func powerServices(ctx context.Context, props map[string]Processor) (map[string]*ServiceInfo, error) {
-	serv := make(map[string]*ServiceInfo, len(props))
+func powerServices(ctx context.Context, props map[string]common.Processor) (map[string]*common.ServiceInfo, error) {
+	serv := make(map[string]*common.ServiceInfo, len(props))
 
 	for name, processor := range props {
-		addr, engine := processor.Engine()
-		switch engineIns := engine.(type) {
-		case *gin.Engine:
-			power := ginPower{engineIns}
-			servAddr, err := power.Power(ctx, addr)
-			if err != nil {
-				return nil, err
-			}
-			// todo do register job, and get all services
-			vlog.Info(ctx, "servAddr is ", servAddr)
-			serv[name] = &ServiceInfo{
-				Type: ServiceTypeGin,
-				Addr: servAddr,
-			}
+		addr, engineFunc := processor.Engine()
+		enginePower, ok := engine.GetEnginePower(engineFunc)
+		if !ok {
+			return nil, fmt.Errorf("not found engine power")
+		}
+
+		listenAddr, err := enginePower.Power(ctx, addr)
+		if err != nil {
+			return nil, err
+		}
+
+		serv[name] = &common.ServiceInfo{
+			Type: enginePower.Type(),
+			Addr: listenAddr,
 		}
 	}
 

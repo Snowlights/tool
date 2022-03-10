@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 	"time"
-	"vtool/server/common"
-	"vtool/server/consul"
 	"vtool/vnet"
 	"vtool/vprometheus/vmetric"
+	"vtool/vservice/common"
+	"vtool/vservice/service/register/consul"
 )
 
 func TestNewCollector(t *testing.T) {

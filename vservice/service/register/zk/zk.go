@@ -2,7 +2,7 @@ package zk
 
 import (
 	"github.com/samuel/go-zookeeper/zk"
-	"vtool/server/common"
+	"vtool/vservice/common"
 )
 
 func NewRegister(regConfig *RegisterConfig) (*Register, error) {

@@ -1,6 +1,6 @@
 package zk
 
-import "vtool/server/common"
+import "vtool/vservice/common"
 
 type Event struct {
 	EventType common.EventType

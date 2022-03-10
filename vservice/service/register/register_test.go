@@ -1,4 +1,4 @@
-package server
+package register
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 	"time"
-	"vtool/server/common"
+	"vtool/vservice/common"
 )
 
 func TestRegisterService(t *testing.T) {
