@@ -62,6 +62,11 @@ func (c *Register) keepAlive(ctx context.Context, keepAliveRes <-chan *clientv3.
 	}
 }
 
+func (c *Register) UnRegister(ctx context.Context, path string) error {
+	c.client.Delete(ctx, path)
+	return nil
+}
+
 func (c *Register) Get(ctx context.Context, path string) (string, error) {
 
 	res, err := c.client.Get(ctx, path)

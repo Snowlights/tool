@@ -10,7 +10,7 @@ import (
 	"vtool/vnet"
 	"vtool/vprometheus/vmetric"
 	"vtool/vservice/common"
-	"vtool/vservice/service/register/consul"
+	"vtool/vservice/server/register/consul"
 )
 
 func TestNewCollector(t *testing.T) {
@@ -94,7 +94,7 @@ func TestNewCollector3(t *testing.T) {
 		return
 	}
 
-	consul.DefaultConsulInstance.Register(context.Background(), "consul/group/base/censor/1", listen.Addr().String(), common.DefaultTTl)
+	consul.DefaultConsulInstance.Register(context.Background(), "/group/base/censor/1", listen.Addr().String(), common.DefaultTTl)
 
 	http.Handle("/health", MyHandler{})
 	http.Handle("/metrics", promhttp.Handler())

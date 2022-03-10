@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
-	"vtool/vservice/service/register/consul"
+	"vtool/vservice/server/register/consul"
 )
 
 //Nerve SD configurations allow retrieving scrape targets from [AirBnB's Nerve]
@@ -15,7 +15,7 @@ import (
 // which are stored in Zookeeper. Serversets are commonly used by Finagle and Aurora.
 
 // Zookeeper only supports these two kinds of structured data,
-// but we implement service registration and discovery by ourselves, so we don't use ZK for service index statistics
+// but we implement server registration and discovery by ourselves, so we don't use ZK for server index statistics
 
 const DefaultMetricPath = "/metrics"
 

@@ -48,6 +48,8 @@ type Register interface {
 	// Execute registration, and the heartbeat will be maintained after registration.
 	// When calling registration, the current value will be set to the node
 	Register(ctx context.Context, path, val string, ttl time.Duration) error
+	// unRegister Service
+	UnRegister(ctx context.Context, path string) error
 	// get all node
 	GetNode(ctx context.Context, path string) ([]Node, error)
 	// event

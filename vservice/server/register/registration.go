@@ -9,9 +9,9 @@ import (
 	"time"
 	"vtool/vlog"
 	"vtool/vservice/common"
-	"vtool/vservice/service/register/consul"
-	"vtool/vservice/service/register/etcd"
-	"vtool/vservice/service/register/zk"
+	"vtool/vservice/server/register/consul"
+	"vtool/vservice/server/register/etcd"
+	"vtool/vservice/server/register/zk"
 )
 
 func RegisterService(ctx context.Context, config *common.RegisterConfig) error {

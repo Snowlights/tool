@@ -30,13 +30,19 @@ func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.
 	registration.Check = check
 	port, _ := strconv.ParseInt(parts[1], 10, 64)
 	registration.Port = int(port)
-	registration.Name = path
+	registration.Name = ConsulNamespace + path
 	registration.Address = parts[0]
+	registration.ID = path
 
 	err := c.client.Agent().ServiceRegister(registration)
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *Register) UnRegister(ctx context.Context, path string) error {
+	c.client.Agent().ServiceDeregister(ConsulNamespace + path)
 	return nil
 }
 

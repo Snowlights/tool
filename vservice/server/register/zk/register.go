@@ -68,6 +68,11 @@ func (c *Register) ensurePath(path string) error {
 	return nil
 }
 
+func (c *Register) UnRegister(ctx context.Context, path string) error {
+	c.conn.Delete(path, 0)
+	return nil
+}
+
 func (c *Register) Get(ctx context.Context, path string) (string, error) {
 
 	res, _, err := c.conn.Get(path)
@@ -138,7 +143,7 @@ func (c *Register) Watch(ctx context.Context, path string) (chan common.Event, e
 // The referenced SDK has no - t option and will not be demonstrated here.
 // It is generally used as a distributed lock. In this scenario,
 // the - e parameter is used to meet the requirements of
-// the service registration and discovery scenario
+// the server registration and discovery scenario
 func (c *Register) RefreshTtl(ctx context.Context, path, val string, ttl time.Duration) error {
 
 	return nil

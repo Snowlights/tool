@@ -1,4 +1,4 @@
-package service
+package server
 
 import (
 	"context"
@@ -11,10 +11,20 @@ import (
 	"vtool/vlog"
 	"vtool/vprometheus/vcollector"
 	"vtool/vservice/common"
-	"vtool/vservice/service/engine"
-	register2 "vtool/vservice/service/register"
-	"vtool/vservice/service/register/consul"
+	"vtool/vservice/server/engine"
+	register2 "vtool/vservice/server/register"
+	"vtool/vservice/server/register/consul"
 )
+
+var server *Server
+
+func init() {
+	server = &Server{}
+}
+
+type Server struct {
+	serviceBase common.ServerBase
+}
 
 func Serv(ctx context.Context, registerConfig *common.RegisterConfig, props map[string]common.Processor) error {
 	err := serverIns(ctx, registerConfig, props)
@@ -52,12 +62,12 @@ func Stop() {
 
 func serverIns(ctx context.Context, registerConfig *common.RegisterConfig, props map[string]common.Processor) error {
 
-	// power service
+	// power server
 	serv, err := powerServices(ctx, props)
 	if err != nil {
 		return err
 	}
-	// register service
+	// register server
 	err = register(ctx, registerConfig, serv)
 	if err != nil {
 		return err
