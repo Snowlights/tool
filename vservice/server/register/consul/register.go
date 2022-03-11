@@ -16,7 +16,7 @@ type Register struct {
 	check  api.AgentServiceCheck
 }
 
-func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.Duration) error {
+func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.Duration) (string, error) {
 	registration := new(api.AgentServiceRegistration)
 	parts := strings.Split(servAddr, common.Colon)
 	// health check caller
@@ -36,9 +36,9 @@ func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.
 
 	err := c.client.Agent().ServiceRegister(registration)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return "", nil
 }
 
 func (c *Register) UnRegister(ctx context.Context, path string) error {

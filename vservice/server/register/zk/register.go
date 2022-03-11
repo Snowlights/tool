@@ -3,8 +3,12 @@ package zk
 import (
 	"context"
 	"github.com/samuel/go-zookeeper/zk"
+	"math/rand"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
+	"vtool/vlog"
 	"vtool/vservice/common"
 )
 
@@ -20,17 +24,70 @@ type Register struct {
 // then /public/base/web/
 // final /public/base/web/service1
 
-func (c *Register) Register(ctx context.Context, path, val string, ttl time.Duration) error {
+func (c *Register) Register(ctx context.Context, path, val string, ttl time.Duration) (string, error) {
 	if err := c.ensureAllPathExit(path); err != nil {
-		return err
+		return "", err
 	}
 
+	rand.Seed(time.Now().Unix())
+	retry := 0
+	for retry = 0; ; retry++ {
+		id, err := c.calculateCurrentServID(ctx, path)
+		if err != nil {
+			retry++
+			time.Sleep(common.DefaultTTl)
+			continue
+		}
+		servPath := path + common.Slash + id
+
+		err = c.register(ctx, servPath, val, ttl)
+		if err == nil {
+			vlog.InfoF(ctx, servPath, val, "register success")
+			return id, nil
+		} else {
+			vlog.ErrorF(ctx, servPath, val, "register failed error is %s", err.Error())
+		}
+		retry++
+		time.Sleep(common.DefaultTTl)
+	}
+}
+
+func (c *Register) register(ctx context.Context, path, val string, ttl time.Duration) error {
 	_, err := c.conn.Create(path, []byte(val), zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
 	if err != nil {
 		return err
 	}
-
 	return nil
+}
+
+func (c *Register) calculateCurrentServID(ctx context.Context, path string) (string, error) {
+	fun := "etcd.Register.calculateCurrentServID --> "
+
+	idList := make([]int, 0)
+	nodes, err := c.GetNode(ctx, path)
+	if err != nil {
+		return "", err
+	}
+	for _, n := range nodes {
+		id := n.Key()[strings.LastIndex(n.Key(), common.Slash)+1:]
+		idInt, err := strconv.Atoi(id)
+		if err != nil || idInt < 0 {
+			vlog.ErrorF(ctx, "%s id error key:%s", fun, n.Key())
+		} else {
+			idList = append(idList, idInt)
+		}
+	}
+
+	sort.Ints(idList)
+	idRes := 0
+	for _, id := range idList {
+		if idRes == id {
+			idRes++
+		} else {
+			break
+		}
+	}
+	return strconv.FormatInt(int64(idRes), 10), nil
 }
 
 // It is not recommended to use the new method here. It is

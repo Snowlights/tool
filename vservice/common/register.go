@@ -8,6 +8,7 @@ import (
 type (
 	RegistrationType int64
 	EventType        int64
+	ServiceType      string
 )
 
 const (
@@ -15,6 +16,8 @@ const (
 	Equals     = "="
 	Slash      = "/"
 	HttpPrefix = "http://"
+
+	DefaultRegisterPath = "/tools"
 )
 
 const (
@@ -23,6 +26,12 @@ const (
 	Consul    RegistrationType = 3
 
 	ChildrenChanged EventType = 1
+
+	HTTP   ServiceType = "http"
+	Thrift ServiceType = "thrift"
+	Grpc   ServiceType = "grpc"
+
+	Metric ServiceType = "metric"
 )
 
 const (
@@ -47,7 +56,7 @@ type Register interface {
 	RefreshTtl(ctx context.Context, path, val string, ttl time.Duration) error
 	// Execute registration, and the heartbeat will be maintained after registration.
 	// When calling registration, the current value will be set to the node
-	Register(ctx context.Context, path, val string, ttl time.Duration) error
+	Register(ctx context.Context, path, val string, ttl time.Duration) (string, error)
 	// unRegister Service
 	UnRegister(ctx context.Context, path string) error
 	// get all node

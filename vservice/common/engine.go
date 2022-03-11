@@ -15,11 +15,11 @@ type EnginePower interface {
 }
 
 type ServerBase interface {
-	Register(map[string]Processor) error
+	Register(context.Context, map[ServiceType]Processor) error
 
 	ServName() string
 	ServGroup() string
-	ServInfo() map[string]*ServiceInfo
+	ServInfo() map[ServiceType]*ServiceInfo
 
 	FullServiceRegisterPath() string
 

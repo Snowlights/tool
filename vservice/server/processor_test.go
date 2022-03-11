@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"os"
 	"testing"
 	"time"
 	"vtool/vprometheus/vmetric"
@@ -23,6 +24,11 @@ func (mp *TestProcessor) Engine() (string, interface{}) {
 	engine.Use(gin.Recovery())
 
 	return "", engine
+}
+
+func TestStop(t *testing.T) {
+	val, err := os.Executable()
+	fmt.Println(val, err.Error())
 }
 
 func TestServ(t *testing.T) {
@@ -57,7 +63,7 @@ func TestServ(t *testing.T) {
 		RegistrationType: common.ZOOKEEPER,
 		ServName:         "censor",
 		Group:            "/group/base",
-	}, map[string]common.Processor{
+	}, map[common.ServiceType]common.Processor{
 		"test": &TestProcessor{},
 	})
 	if err != nil {
