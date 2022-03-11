@@ -41,7 +41,7 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 		baseLoc:        common.DefaultRegisterPath,
 		name:           args.serviceName,
 		group:          args.serviceGroup,
-		path:           common.DefaultRegisterPath + args.serviceGroup + args.serviceName,
+		path:           common.DefaultRegisterPath + common.Slash + args.serviceGroup + common.Slash + args.serviceName,
 		ttl:            common.DefaultTTl,
 		shutDown: func() {
 			vlog.InfoF(ctx, "service quit ~")
@@ -72,9 +72,12 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 }
 
 func (sb *ServiceBase) initMetric(ctx context.Context) error {
+	// todo metric info collection
+
 	serv, err := sb.powerServices(ctx, map[common.ServiceType]common.Processor{
 		common.Metric: &vcollector.MetricProcessor{},
 	})
+
 	if err != nil {
 		return err
 	}
@@ -83,7 +86,7 @@ func (sb *ServiceBase) initMetric(ctx context.Context) error {
 		return nil
 	}
 
-	_, err = sb.metricRegister.Register(ctx, consul.ConsulNamespace+sb.FullServiceRegisterPath(), serviceInfo.Addr, common.DefaultTTl)
+	_, err = sb.metricRegister.Register(ctx, sb.FullServiceRegisterPath(), serviceInfo.Addr, common.DefaultTTl)
 	if err != nil {
 		return err
 	}
@@ -142,6 +145,7 @@ func (sb *ServiceBase) FullServiceRegisterPath() string {
 
 func (sb *ServiceBase) Stop() {
 	ctx := context.Background()
-	sb.register.UnRegister(ctx, sb.path)
-	sb.metricRegister.UnRegister(ctx, sb.path)
+	sb.register.UnRegister(ctx, sb.FullServiceRegisterPath())
+	sb.metricRegister.UnRegister(ctx, sb.FullServiceRegisterPath())
+	sb.shutDown()
 }

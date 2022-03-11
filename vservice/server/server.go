@@ -46,7 +46,7 @@ func (s *Server) serv(props map[common.ServiceType]common.Processor) error {
 
 	s.serviceBase = servBase
 
-	err = s.serverIns(ctx, props)
+	err = s.serviceBase.Register(ctx, props)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (s *Server) awaitSignal() {
 			if signalInfo.String() == syscall.SIGTERM.String() {
 				vlog.InfoF(ctx, "receive a signal: %s, stop service", signalInfo.String())
 				s.serviceBase.Stop()
-				<-(chan int)(nil)
+				return
 			}
 		}
 	}
@@ -107,8 +107,4 @@ func (s *Server) parseServiceInfo() (*servArgs, error) {
 		logDir:       logDir,
 		registerType: common.RegistrationType(registerType),
 	}, nil
-}
-
-func (s *Server) serverIns(ctx context.Context, props map[common.ServiceType]common.Processor) error {
-	return s.serviceBase.Register(ctx, props)
 }

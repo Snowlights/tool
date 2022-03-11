@@ -15,6 +15,7 @@ const (
 	Colon      = ":"
 	Equals     = "="
 	Slash      = "/"
+	Bar        = "-"
 	HttpPrefix = "http://"
 
 	DefaultRegisterPath = "/tools"

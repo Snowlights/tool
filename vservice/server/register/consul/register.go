@@ -32,7 +32,7 @@ func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.
 	registration.Port = int(port)
 	registration.Name = ConsulNamespace + path
 	registration.Address = parts[0]
-	registration.ID = path
+	registration.ID = c.buildInsID(path)
 
 	err := c.client.Agent().ServiceRegister(registration)
 	if err != nil {
@@ -41,9 +41,12 @@ func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.
 	return "", nil
 }
 
+func (c *Register) buildInsID(path string) string {
+	return strings.ReplaceAll(path, common.Slash, common.Bar)
+}
+
 func (c *Register) UnRegister(ctx context.Context, path string) error {
-	c.client.Agent().ServiceDeregister(ConsulNamespace + path)
-	return nil
+	return c.client.Agent().ServiceDeregister(c.buildInsID(path))
 }
 
 func (c Register) Get(ctx context.Context, path string) (string, error) {

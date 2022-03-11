@@ -22,7 +22,8 @@ const DefaultMetricPath = "/metrics"
 type MetricProcessor struct{}
 
 func (mp *MetricProcessor) Prepare() error {
-	// set default metric
+	// todo set default metric
+
 	return nil
 }
 
