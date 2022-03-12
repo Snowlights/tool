@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 	"vtool/vlog"
+	"vtool/vprometheus/metric"
 	"vtool/vprometheus/vcollector"
 	"vtool/vservice/common"
 	"vtool/vservice/server/engine"
@@ -21,6 +22,8 @@ type ServiceBase struct {
 	name    string
 	group   string
 	ID      string
+
+	servAddr string
 
 	path string
 	val  map[common.ServiceType]*common.ServiceInfo
@@ -66,13 +69,14 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 	}
 	sb.ID = servID
 	sb.val = serv
+	sb.servAddr = string(val)
 
 	sb.initMetric(ctx)
 	return nil
 }
 
 func (sb *ServiceBase) initMetric(ctx context.Context) error {
-	// todo metric info collection
+	metric.InitBaseMetric(ctx, sb.group, sb.name, sb.servAddr)
 
 	serv, err := sb.powerServices(ctx, map[common.ServiceType]common.Processor{
 		common.Metric: &vcollector.MetricProcessor{},
