@@ -12,6 +12,12 @@ const (
 	reloadTime = time.Second * 10
 )
 
+var defaultProcessMonitor *ProcessMonitor
+
+func init() {
+	defaultProcessMonitor = &ProcessMonitor{}
+}
+
 type ProcessMonitor struct {
 	Group    string
 	Service  string
@@ -24,6 +30,7 @@ func InitBaseMetric(ctx context.Context, group, service, instance string) *Proce
 		Service:  service,
 		Instance: instance,
 	}
+	defaultProcessMonitor = p
 	go p.reload(ctx)
 	return p
 }
@@ -37,6 +44,11 @@ func (p ProcessMonitor) reload(ctx context.Context) {
 			break
 		}
 	}
+}
+
+func (p ProcessMonitor) statApi(api string, duration time.Duration) {
+	_metricAPIRequestCount.With(group, p.Group, service, p.Service, serviceLabelType, api).Inc()
+	_metricAPIRequestTime.With(group, p.Group, service, p.Service, serviceLabelType, api).Observe(float64(duration.Nanoseconds() / 1e6))
 }
 
 func (p ProcessMonitor) work() {
