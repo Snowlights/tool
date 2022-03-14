@@ -5,6 +5,7 @@ import (
 	"net"
 )
 
+// must init in serv base func
 func NewRegistry(regConfig *RegisterConfig) (*Register, error) {
 	config := api.DefaultConfig()
 	config.Address = net.JoinHostPort(regConfig.Host, regConfig.Port)
@@ -15,6 +16,5 @@ func NewRegistry(regConfig *RegisterConfig) (*Register, error) {
 	}
 
 	register := &Register{client: client}
-	DefaultConsulInstance = register
-	return DefaultConsulInstance, nil
+	return register, nil
 }

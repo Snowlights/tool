@@ -30,7 +30,7 @@ func (c Register) Register(ctx context.Context, path, servAddr string, ttl time.
 	registration.Check = check
 	port, _ := strconv.ParseInt(parts[1], 10, 64)
 	registration.Port = int(port)
-	registration.Name = ConsulNamespace + path
+	registration.Name = common.ConsulNamespace + path
 	registration.Address = parts[0]
 	registration.ID = c.buildInsID(path)
 
@@ -58,10 +58,6 @@ func (c Register) RefreshTtl(ctx context.Context, path, val string, ttl time.Dur
 	return nil
 }
 
-func (c Register) GetNode(ctx context.Context, path string) ([]common.Node, error) {
-	return nil, nil
-}
-
-func (c Register) Watch(ctx context.Context, path string) (chan common.Event, error) {
+func (c Register) GetNode(ctx context.Context, path string) ([]*common.RegisterServiceInfo, error) {
 	return nil, nil
 }

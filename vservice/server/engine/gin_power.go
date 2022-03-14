@@ -31,6 +31,6 @@ func (c *GinPower) Power(ctx context.Context, addr string) (string, error) {
 	return listener.Addr().String(), nil
 }
 
-func (c *GinPower) Type() string {
-	return common.ServiceTypeGin
+func (c *GinPower) Type() common.EngineType {
+	return common.Gin
 }

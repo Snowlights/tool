@@ -22,6 +22,5 @@ func NewRegister(regConfig *RegisterConfig) (*Register, error) {
 	}
 
 	register := &Register{client: client}
-	DefaultEtcdInstance = register
-	return DefaultEtcdInstance, nil
+	return register, nil
 }

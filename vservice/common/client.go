@@ -1,5 +1,13 @@
 package common
 
 type Client interface {
-	Watch() chan Event
+	GetAllServAddr() []*RegisterServiceInfo
+}
+
+type ClientConfig struct {
+	RegistrationType RegistrationType
+	Cluster          []string
+
+	ServGroup string
+	ServName  string
 }

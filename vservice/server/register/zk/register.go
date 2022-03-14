@@ -2,6 +2,7 @@ package zk
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/samuel/go-zookeeper/zk"
 	"math/rand"
 	"sort"
@@ -69,10 +70,10 @@ func (c *Register) calculateCurrentServID(ctx context.Context, path string) (str
 		return "", err
 	}
 	for _, n := range nodes {
-		id := n.Key()[strings.LastIndex(n.Key(), common.Slash)+1:]
+		id := n.ServPath[strings.LastIndex(n.ServPath, common.Slash)+1:]
 		idInt, err := strconv.Atoi(id)
 		if err != nil || idInt < 0 {
-			vlog.ErrorF(ctx, "%s id error key:%s", fun, n.Key())
+			vlog.ErrorF(ctx, "%s id error key:%s", fun, n.ServPath)
 		} else {
 			idList = append(idList, idInt)
 		}
@@ -140,14 +141,14 @@ func (c *Register) Get(ctx context.Context, path string) (string, error) {
 	return string(res), nil
 }
 
-func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, error) {
+func (c *Register) GetNode(ctx context.Context, path string) ([]*common.RegisterServiceInfo, error) {
 	c.ensurePath(path)
 	res, _, err := c.conn.Children(path)
 	if err != nil {
 		return nil, err
 	}
 
-	nodeList := make([]common.Node, 0, len(res))
+	nodeList := make([]*common.RegisterServiceInfo, 0, len(res))
 	for _, child := range res {
 		fullPath := path + common.Slash + child
 		data, _, err := c.conn.Get(fullPath)
@@ -157,41 +158,19 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, err
 			}
 			return nil, err
 		}
-		valStr := string(data)
-		node := &Node{
-			key: fullPath,
-			val: valStr,
+		val := make(map[common.ServiceType]*common.ServiceInfo, 1)
+		err = json.Unmarshal(data, &val)
+		if err != nil {
+			continue
+		}
+		node := &common.RegisterServiceInfo{
+			ServPath: fullPath,
+			ServList: val,
 		}
 		nodeList = append(nodeList, node)
 	}
 
 	return nodeList, nil
-}
-
-func (c *Register) Watch(ctx context.Context, path string) (chan common.Event, error) {
-	snapshots := make(chan []string)
-	eventChan := make(chan common.Event)
-	errors := make(chan error)
-
-	go func() {
-		for {
-			snapshot, _, events, err := c.conn.ChildrenW(path)
-			if err != nil {
-				errors <- err
-				return
-			}
-			// todo if you would use snapshot you can do something here
-			snapshots <- snapshot
-			evt := <-events
-			if evt.Err != nil {
-				errors <- evt.Err
-				return
-			}
-			eventChan <- Event{common.ChildrenChanged}
-		}
-	}()
-
-	return eventChan, nil
 }
 
 // TTL node is added in version 3.5.5

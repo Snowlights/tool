@@ -17,6 +17,5 @@ func NewRegister(regConfig *RegisterConfig) (*Register, error) {
 	}
 
 	register := &Register{conn: conn}
-	DefaultZkInstance = register
-	return DefaultZkInstance, nil
+	return register, nil
 }

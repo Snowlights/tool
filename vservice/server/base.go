@@ -34,14 +34,26 @@ type ServiceBase struct {
 }
 
 func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
-	regEngine, err := register.GetRegisterEngine(args.registerType)
+	regEngine, err := register.GetRegisterEngine(&common.RegisterConfig{
+		RegistrationType: args.registerType,
+		Cluster:          args.cluster,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	metricRegister, err := consul.NewRegistry(&consul.RegisterConfig{
+		Host:  common.ConsulDefaultHost,
+		Port:  common.ConsulDefaultPort,
+		Token: common.ConsulDefaultToken,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &ServiceBase{
 		register:       regEngine,
-		metricRegister: consul.DefaultConsulInstance,
+		metricRegister: metricRegister,
 		baseLoc:        common.DefaultRegisterPath,
 		name:           args.serviceName,
 		group:          args.serviceGroup,

@@ -26,6 +26,8 @@ type servArgs struct {
 
 	logDir       string
 	registerType common.RegistrationType
+
+	cluster []string
 }
 
 func ServService(props map[common.ServiceType]common.Processor) error {

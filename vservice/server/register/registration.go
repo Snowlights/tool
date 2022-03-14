@@ -2,25 +2,24 @@ package register
 
 import (
 	"vtool/vservice/common"
-	"vtool/vservice/server/register/consul"
 	"vtool/vservice/server/register/etcd"
 	"vtool/vservice/server/register/zk"
 )
 
-func GetRegisterEngine(registerType common.RegistrationType) (common.Register, error) {
-
-	var engine common.Register
-	switch registerType {
+func GetRegisterEngine(registerConfig *common.RegisterConfig) (common.Register, error) {
+	switch registerConfig.RegistrationType {
 	case common.ETCD:
-		engine = etcd.DefaultEtcdInstance
+		return etcd.NewRegister(&etcd.RegisterConfig{
+			Cluster: registerConfig.Cluster,
+			TimeOut: common.DefaultTTl,
+		})
 	case common.ZOOKEEPER:
-		engine = zk.DefaultZkInstance
-	case common.Consul:
-		// only for metric collection
-		engine = consul.DefaultConsulInstance
+		return zk.NewRegister(&zk.RegisterConfig{
+			Cluster: registerConfig.Cluster,
+			TimeOut: common.DefaultTTl,
+		})
 	default:
 		return nil, common.UnSupportedRegistrationType
 	}
 
-	return engine, nil
 }

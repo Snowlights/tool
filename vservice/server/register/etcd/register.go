@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"encoding/json"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"math/rand"
 	"sort"
@@ -99,10 +100,10 @@ func (c *Register) calculateCurrentServID(ctx context.Context, path string) (str
 	idList := make([]int, 0)
 
 	for _, n := range nodes {
-		id := n.Key()[strings.LastIndex(n.Key(), common.Slash)+1:]
+		id := n.ServPath[strings.LastIndex(n.ServPath, common.Slash)+1:]
 		idInt, err := strconv.Atoi(id)
 		if err != nil || idInt < 0 {
-			vlog.ErrorF(ctx, "%s id error key:%s", fun, n.Key())
+			vlog.ErrorF(ctx, "%s id error key:%s", fun, n.ServPath)
 		} else {
 			idList = append(idList, idInt)
 		}
@@ -138,19 +139,23 @@ func (c *Register) Get(ctx context.Context, path string) (string, error) {
 	return "", nil
 }
 
-func (c *Register) GetNode(ctx context.Context, path string) ([]common.Node, error) {
+func (c *Register) GetNode(ctx context.Context, path string) ([]*common.RegisterServiceInfo, error) {
 
 	res, err := c.client.Get(ctx, path, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
 
-	nodeList := make([]common.Node, 0, len(res.Kvs))
+	nodeList := make([]*common.RegisterServiceInfo, 0, len(res.Kvs))
 	for _, v := range res.Kvs {
-		valStr := string(v.Value)
-		node := &Node{
-			key: string(v.Key),
-			val: valStr,
+		val := make(map[common.ServiceType]*common.ServiceInfo, 1)
+		err = json.Unmarshal(v.Value, &val)
+		if err != nil {
+			continue
+		}
+		node := &common.RegisterServiceInfo{
+			ServPath: string(v.Key),
+			ServList: val,
 		}
 		nodeList = append(nodeList, node)
 	}
@@ -178,20 +183,4 @@ func (c *Register) RefreshTtl(ctx context.Context, path, val string, ttl time.Du
 	}
 
 	return nil
-}
-
-func (c *Register) Watch(ctx context.Context, path string) (chan common.Event, error) {
-	watchChan := c.client.Watch(ctx, path, clientv3.WithPrefix())
-	eventChan := make(chan common.Event)
-
-	go func() {
-		for {
-			msg := <-watchChan
-			if len(msg.Events) > 0 {
-				eventChan <- Event{common.ChildrenChanged}
-			}
-		}
-	}()
-
-	return eventChan, nil
 }
