@@ -79,10 +79,10 @@ func (s *Server) awaitSignal() {
 func (s *Server) parseServiceInfo() (*servArgs, error) {
 	var serv, logDir, group string
 	var registerType int64
-	flag.StringVar(&serv, "serv", "", "service name")
-	flag.StringVar(&logDir, "logDir", "", "service log dir")
-	flag.StringVar(&group, "group", "", "service group")
-	flag.Int64Var(&registerType, "regType", 0, "service register type")
+	flag.StringVar(&serv, "serv", "censor", "service name")
+	flag.StringVar(&logDir, "logDir", "/tmp", "service log dir")
+	flag.StringVar(&group, "group", "base/talent", "service group")
+	flag.Int64Var(&registerType, "regType", 1, "service register type")
 	flag.Parse()
 
 	if len(serv) == 0 {

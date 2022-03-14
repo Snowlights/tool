@@ -9,7 +9,7 @@ const (
 	serviceLabelType = "servLabelType"
 
 	apiType         = "api"
-	count           = "requestCount"
+	requestCount    = "requestCount"
 	requestDuration = "requestDuration"
 )
 
@@ -19,7 +19,7 @@ var (
 	_metricAPIRequestCount = vmetric.NewCounter(&vmetric.VecOpts{
 		NameSpace:  serviceNamespace,
 		SubSystem:  apiType,
-		Name:       count,
+		Name:       requestCount,
 		Help:       "api request count",
 		LabelNames: []string{group, service, serviceLabelType},
 	})

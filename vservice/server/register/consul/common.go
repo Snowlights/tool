@@ -21,6 +21,7 @@ const (
 
 var DefaultConsulInstance *Register
 
+// must init, todo change to apollo config
 func init() {
 	ins, err := NewRegistry(&RegisterConfig{
 		Host:  defaultHost,

@@ -15,6 +15,7 @@ import (
 )
 
 type ServiceBase struct {
+	// todo change to apollo
 	register       common.Register
 	metricRegister common.Register
 
@@ -76,7 +77,7 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 }
 
 func (sb *ServiceBase) initMetric(ctx context.Context) error {
-	metric.InitBaseMetric(ctx, sb.group, sb.name, sb.servAddr)
+	metric.InitBaseMetric(ctx, sb.group, sb.name, sb.ID)
 
 	serv, err := sb.powerServices(ctx, map[common.ServiceType]common.Processor{
 		common.Metric: &vcollector.MetricProcessor{},

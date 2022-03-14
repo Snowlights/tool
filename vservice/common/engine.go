@@ -5,7 +5,6 @@ import (
 )
 
 type Processor interface {
-	Prepare() error
 	Engine() (string, interface{})
 }
 
@@ -24,6 +23,8 @@ type ServerBase interface {
 	FullServiceRegisterPath() string
 
 	Stop()
+
+	// todo add config to apollo
 
 	// todo service region
 	// eg: beijing、hangzhou、shanghai
