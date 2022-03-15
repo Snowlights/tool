@@ -1,12 +1,13 @@
 package vnet
 
 import (
+	"context"
 	"fmt"
 	"testing"
 )
 
 func TestGetLocalIp(t *testing.T) {
 
-	fmt.Println(GetServAddr(":4445"))
+	fmt.Println(ListenServAddr(context.Background(), ":"))
 
 }

@@ -1,7 +1,7 @@
 package vnet
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"net"
 )
@@ -23,6 +23,26 @@ func GetServAddr(servAddr string) (string, error) {
 	}
 
 	return addr, nil
+}
+
+// Open port listening and return the service address
+func ListenServAddr(ctx context.Context, addr string) (net.Listener, error) {
+	servAddr, err := GetServAddr(addr)
+	if err != nil {
+		return nil, err
+	}
+
+	tcpAddr, err := net.ResolveTCPAddr(networkTypeTCP, servAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	netListen, err := net.Listen(tcpAddr.Network(), tcpAddr.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return netListen, nil
 }
 
 func GetLocalHost(addrTcp net.Addr) (string, error) {
@@ -66,5 +86,5 @@ func GetInternalIP() (string, error) {
 		}
 	}
 
-	return "", errors.New("no internal ip")
+	return "", NoInternalIp
 }
