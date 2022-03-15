@@ -25,11 +25,11 @@ const (
 	ZOOKEEPER RegistrationType = 2
 	Consul    RegistrationType = 3
 
-	HTTP   ServiceType = "http"
-	Thrift ServiceType = "thrift"
-	Grpc   ServiceType = "grpc"
+	HTTP   ServiceType = "serv_http"
+	Thrift ServiceType = "serv_thrift"
+	Grpc   ServiceType = "serv_grpc"
 
-	Metric ServiceType = "metric"
+	Metric ServiceType = "serv_metric"
 )
 
 const DefaultTTl = time.Second * 10

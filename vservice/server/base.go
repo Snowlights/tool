@@ -22,12 +22,13 @@ type ServiceBase struct {
 	baseLoc string
 	name    string
 	group   string
+	lane    string
 	ID      string
 
 	servAddr string
 
 	path string
-	val  map[common.ServiceType]*common.ServiceInfo
+	val  *common.RegisterServiceInfo
 	ttl  time.Duration
 
 	shutDown func()
@@ -57,6 +58,7 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 		baseLoc:        common.DefaultRegisterPath,
 		name:           args.serviceName,
 		group:          args.serviceGroup,
+		lane:           args.serviceLane,
 		path:           common.DefaultRegisterPath + common.Slash + args.serviceGroup + common.Slash + args.serviceName,
 		ttl:            common.DefaultTTl,
 		shutDown: func() {
@@ -75,6 +77,7 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 	if err != nil {
 		return err
 	}
+	serv.ServPath = sb.path
 
 	servID, err := sb.register.Register(ctx, sb.path, string(val), sb.ttl)
 	if err != nil {
@@ -98,7 +101,7 @@ func (sb *ServiceBase) initMetric(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	serviceInfo, ok := serv[common.Metric]
+	serviceInfo, ok := serv.ServList[common.Metric]
 	if !ok {
 		return nil
 	}
@@ -111,7 +114,7 @@ func (sb *ServiceBase) initMetric(ctx context.Context) error {
 	return nil
 }
 
-func (sb *ServiceBase) powerServices(ctx context.Context, props map[common.ServiceType]common.Processor) (map[common.ServiceType]*common.ServiceInfo, error) {
+func (sb *ServiceBase) powerServices(ctx context.Context, props map[common.ServiceType]common.Processor) (*common.RegisterServiceInfo, error) {
 	serv := make(map[common.ServiceType]*common.ServiceInfo, len(props))
 
 	for name, processor := range props {
@@ -132,7 +135,10 @@ func (sb *ServiceBase) powerServices(ctx context.Context, props map[common.Servi
 		}
 	}
 
-	return serv, nil
+	return &common.RegisterServiceInfo{
+		Lane:     sb.lane,
+		ServList: serv,
+	}, nil
 }
 
 func (sb *ServiceBase) ServName() string {
@@ -144,8 +150,8 @@ func (sb *ServiceBase) ServGroup() string {
 }
 
 func (sb *ServiceBase) ServInfo() map[common.ServiceType]*common.ServiceInfo {
-	m := make(map[common.ServiceType]*common.ServiceInfo, len(sb.val))
-	for k, v := range sb.val {
+	m := make(map[common.ServiceType]*common.ServiceInfo, len(sb.val.ServPath))
+	for k, v := range sb.val.ServList {
 		m[k] = func() *common.ServiceInfo {
 			return &common.ServiceInfo{
 				Type: v.Type,

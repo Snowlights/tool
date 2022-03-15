@@ -2,9 +2,12 @@ package common
 
 import "context"
 
+const ServWeight = 100
+
 type RegisterServiceInfo struct {
-	ServPath string
-	ServList map[ServiceType]*ServiceInfo
+	ServPath string                       `json:"serv_path"`
+	Lane     string                       `json:"lane"`
+	ServList map[ServiceType]*ServiceInfo `json:"serv_list"`
 }
 
 type ServiceInfo struct {

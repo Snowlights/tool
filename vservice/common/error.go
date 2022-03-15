@@ -12,3 +12,5 @@ var (
 	RegisterTypeIsNil = errors.New("register type can not be nil")
 	LogDirIsNil       = errors.New("logDir can not be nil")
 )
+
+var ()

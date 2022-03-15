@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/samuel/go-zookeeper/zk"
+	"strconv"
+	"strings"
 	"sync"
+	"vtool/load_balance/consistent"
 	"vtool/vlog"
 	"vtool/vservice/common"
 )
@@ -16,8 +19,11 @@ type Client struct {
 	servName  string
 	baseLoc   string
 
-	servMu   sync.RWMutex
-	servList []*common.RegisterServiceInfo
+	// Here, in order to ensure that all services are available,
+	// mutex locks are used instead of read-write locks
+	servMu       sync.Mutex
+	servList     []*common.RegisterServiceInfo
+	servLaneHash map[string]*consistent.Consistent
 }
 
 func NewZkClient(config *ClientConfig) (*Client, error) {
@@ -32,17 +38,18 @@ func NewZkClient(config *ClientConfig) (*Client, error) {
 	}
 
 	cli := &Client{
-		conn:      conn,
-		servGroup: config.ServGroup,
-		servName:  config.ServName,
-		baseLoc:   common.DefaultRegisterPath,
+		conn:         conn,
+		servGroup:    config.ServGroup,
+		servName:     config.ServName,
+		baseLoc:      common.DefaultRegisterPath,
+		servLaneHash: make(map[string]*consistent.Consistent),
 	}
 	return cli, nil
 }
 
 func (c *Client) GetAllServAddr() []*common.RegisterServiceInfo {
-	c.servMu.RLock()
-	defer c.servMu.RUnlock()
+	c.servMu.Lock()
+	defer c.servMu.Unlock()
 
 	nodeList := make([]*common.RegisterServiceInfo, 0, len(c.servList))
 	for _, v := range c.servList {
@@ -62,6 +69,48 @@ func (c *Client) GetAllServAddr() []*common.RegisterServiceInfo {
 	}
 
 	return nodeList
+}
+
+func (c *Client) GetServAddr(lane string, serviceType common.ServiceType, hashKey string) (*common.ServiceInfo, bool) {
+	ctx := context.Background()
+	c.servMu.Lock()
+	defer c.servMu.Unlock()
+
+	if c.servLaneHash == nil {
+		return nil, false
+	}
+
+	hash, ok := c.servLaneHash[lane]
+	if !ok {
+		hash, ok = c.servLaneHash[""]
+		if !ok {
+			vlog.ErrorF(ctx, "c.servLaneHash[\"\"] == nil, serv path:%s hash circle lane:%s key:%s", c.servPath(), lane, hashKey)
+			return nil, false
+		}
+	}
+
+	key, err := hash.Get(hashKey)
+	if err != nil {
+		vlog.ErrorF(ctx, "hash get serv key failed, error is %s, serv path:%s hash circle lane:%s key:%s", err.Error(), c.servPath(), lane, hashKey)
+		return nil, false
+	}
+
+	servPathPartIndex := strings.LastIndex(key, common.HashKey)
+	servPath := key[:servPathPartIndex]
+
+	for _, serv := range c.servList {
+		if servPath == serv.ServPath && lane == serv.Lane {
+			servInfo, ok := serv.ServList[serviceType]
+			if ok {
+				return &common.ServiceInfo{
+					Type: servInfo.Type,
+					Addr: servInfo.Addr,
+				}, true
+			}
+		}
+	}
+
+	return nil, false
 }
 
 func (c *Client) ensurePath(path string) error {
@@ -107,6 +156,7 @@ func (c *Client) reloadAllServ(ctx context.Context) error {
 	}
 
 	servList := make([]*common.RegisterServiceInfo, 0, len(res))
+	servLaneToHashKeyList := make(map[string][]string)
 	for _, child := range res {
 		fullPath := c.servPath() + common.Slash + child
 		data, _, err := c.conn.Get(fullPath)
@@ -116,25 +166,36 @@ func (c *Client) reloadAllServ(ctx context.Context) error {
 			}
 			return err
 		}
-		val := make(map[common.ServiceType]*common.ServiceInfo, 1)
+		val := new(common.RegisterServiceInfo)
 		err = json.Unmarshal(data, &val)
 		if err != nil {
 			continue
 		}
-		node := &common.RegisterServiceInfo{
-			ServPath: fullPath,
-			ServList: val,
+
+		keyList := make([]string, 0, common.ServWeight)
+		for i := 0; i < common.ServWeight; i++ {
+			keyList = append(keyList, strings.Join([]string{val.ServPath, strconv.FormatInt(int64(i), 10)}, common.HashKey))
 		}
-		servList = append(servList, node)
+		servLaneToHashKeyList[val.Lane] = keyList
 	}
 
-	c.updateServ(servList)
+	servHash := make(map[string]*consistent.Consistent)
+	for lane, keyList := range servLaneToHashKeyList {
+		hash := consistent.NewConsistentWithServKeys(keyList)
+		if hash == nil {
+			continue
+		}
+		servHash[lane] = hash
+	}
+
+	c.updateServ(servList, servHash)
 	return nil
 }
 
-func (c *Client) updateServ(servList []*common.RegisterServiceInfo) {
+func (c *Client) updateServ(servList []*common.RegisterServiceInfo, servHash map[string]*consistent.Consistent) {
 	c.servMu.Lock()
 	defer c.servMu.Unlock()
 
 	c.servList = servList
+	c.servLaneHash = servHash
 }

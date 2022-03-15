@@ -1,7 +1,7 @@
 package client
 
 import (
-	"time"
+	"net/http"
 	"vtool/vservice/client/etcd"
 	"vtool/vservice/client/zk"
 	"vtool/vservice/common"
@@ -38,6 +38,19 @@ func NewHttpClient(cliConfig *common.ClientConfig) (common.Client, error) {
 
 }
 
-func (hc HttpClient) Do(engineType common.EngineType, runFunc func(addr string, timeout time.Duration)) {
+func (hc HttpClient) Do(engineType common.EngineType) (*http.Response, error) {
 	// todo find a ins to call runFunc
+
+	//serv, ok  := hc.client.GetServAddr("", "", "")
+	//if !ok {
+	//	return nil, nil
+	//}
+
+	return nil, nil
+}
+
+func (hc HttpClient) do(serv *common.ServiceInfo) {
+
+	// todo  do http request with context timeout
+
 }

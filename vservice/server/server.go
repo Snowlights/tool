@@ -23,6 +23,7 @@ type Server struct {
 type servArgs struct {
 	serviceName  string
 	serviceGroup string
+	serviceLane  string
 
 	logDir       string
 	registerType common.RegistrationType
@@ -79,11 +80,12 @@ func (s *Server) awaitSignal() {
 }
 
 func (s *Server) parseServiceInfo() (*servArgs, error) {
-	var serv, logDir, group string
+	var serv, logDir, group, lane string
 	var registerType int64
 	flag.StringVar(&serv, "serv", "censor", "service name")
 	flag.StringVar(&logDir, "logDir", "/tmp", "service log dir")
 	flag.StringVar(&group, "group", "base/talent", "service group")
+	flag.StringVar(&lane, "lane", "", "service lane")
 	flag.Int64Var(&registerType, "regType", 1, "service register type")
 	flag.Parse()
 
@@ -107,6 +109,7 @@ func (s *Server) parseServiceInfo() (*servArgs, error) {
 		serviceName:  serv,
 		serviceGroup: group,
 		logDir:       logDir,
+		serviceLane:  lane,
 		registerType: common.RegistrationType(registerType),
 	}, nil
 }

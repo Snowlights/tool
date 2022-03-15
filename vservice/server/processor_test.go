@@ -1,14 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"testing"
 	"time"
 	"vtool/vprometheus/metric"
-	"vtool/vservice/common"
 )
 
 type TestProcessor struct{}
@@ -65,12 +63,12 @@ func TestServ(t *testing.T) {
 	//	}
 	//}()
 
-	err := ServService(map[common.ServiceType]common.Processor{
-		common.ServiceTypeGin: &TestProcessor{},
-	})
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	//err := ServService(map[common.ServiceType]common.Processor{
+	//	common.ServiceTypeGin: &TestProcessor{},
+	//})
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
 
 }
