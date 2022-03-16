@@ -8,6 +8,7 @@ type EngineType string
 
 const (
 	Gin EngineType = "gin"
+	Rpc EngineType = "rpc"
 )
 
 type Processor interface {

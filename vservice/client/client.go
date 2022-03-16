@@ -54,15 +54,15 @@ func NewHttpClient(cliConfig *common.ClientConfig) (*HttpClient, error) {
 	return c, nil
 }
 
-func (hc HttpClient) Do(args *common.ClientCallerArgs, option *common.CallerOptions) (*common.CallerResponse, error) {
+func (hc HttpClient) Do(args *common.ClientCallerArgs, option interface{}) (interface{}, error) {
 
-	if option.Options == nil {
+	if option == nil {
 		return nil, fmt.Errorf("%s, caller option is nil", common.NeedHttpCallerOption)
 	}
 
-	opt, ok := option.Options.(*common.HttpCallerOptions)
+	opt, ok := option.(*common.HttpCallerOptions)
 	if !ok {
-		return nil, fmt.Errorf("%s, caller option is %+v", common.NeedHttpCallerOption, option.Options)
+		return nil, fmt.Errorf("%s, caller option is %+v", common.NeedHttpCallerOption, option)
 	}
 
 	if len(args.HashKey) == 0 {
@@ -82,7 +82,7 @@ func (hc HttpClient) Do(args *common.ClientCallerArgs, option *common.CallerOpti
 	return hc.do(serv, opt)
 }
 
-func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptions) (*common.CallerResponse, error) {
+func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptions) (interface{}, error) {
 
 	if option.Duration == 0 {
 		option.Duration = common.DefaultMaxTimeOut
@@ -116,5 +116,5 @@ func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptio
 		return nil, err
 	}
 
-	return &common.CallerResponse{Res: body}, nil
+	return body, nil
 }

@@ -20,6 +20,7 @@ func (c *GinPower) Power(ctx context.Context, addr string) (string, error) {
 		return "", err
 	}
 	// todo tracing and other middleware
+	// this should be init before power
 	serv := &http.Server{Handler: c.c}
 	go func() {
 		err := serv.Serve(listener)

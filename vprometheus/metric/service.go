@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	buckets = []float64{5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000}
+	msBuckets = []float64{1, 5, 10, 25, 50, 100, 200, 300, 500, 1000, 3000, 5000, 10000, 15000}
 
 	_metricAPIRequestCount = vmetric.NewCounter(&vmetric.VecOpts{
 		NameSpace:  serviceNamespace,
@@ -28,7 +28,7 @@ var (
 		NameSpace:  serviceNamespace,
 		SubSystem:  apiType,
 		Name:       requestDuration,
-		Buckets:    buckets,
+		Buckets:    msBuckets,
 		Help:       "api request time",
 		LabelNames: []string{group, service, serviceLabelType},
 	})

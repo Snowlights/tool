@@ -25,7 +25,7 @@ type Client interface {
 }
 
 type Caller interface {
-	Do(*ClientCallerArgs, *CallerOptions) (*CallerResponse, error)
+	Do(*ClientCallerArgs, interface{}) (interface{}, error)
 }
 
 type ClientCallerArgs struct {
@@ -33,14 +33,6 @@ type ClientCallerArgs struct {
 	ServType   ServiceType `json:"serv_type"`
 	EngineType EngineType  `json:"engine_type"`
 	HashKey    string      `json:"hash_key"`
-}
-
-type CallerOptions struct {
-	Options interface{} `json:"options"`
-}
-
-type CallerResponse struct {
-	Res interface{} `json:"res"`
 }
 
 type HttpCallerOptions struct {

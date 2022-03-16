@@ -149,17 +149,10 @@ func (sb *ServiceBase) ServGroup() string {
 	return sb.group
 }
 
-func (sb *ServiceBase) ServInfo() map[common.ServiceType]*common.ServiceInfo {
-	m := make(map[common.ServiceType]*common.ServiceInfo, len(sb.val.ServPath))
-	for k, v := range sb.val.ServList {
-		m[k] = func() *common.ServiceInfo {
-			return &common.ServiceInfo{
-				Type: v.Type,
-				Addr: v.Addr,
-			}
-		}()
-	}
-	return m
+func (sb *ServiceBase) ServInfo() *common.RegisterServiceInfo {
+	f := new(common.RegisterServiceInfo)
+	f = sb.val
+	return f
 }
 
 func (sb *ServiceBase) FullServiceRegisterPath() string {
