@@ -2,13 +2,16 @@ package server
 
 import (
 	"context"
+	opentrace_go_grpc "github.com/Snowlights/gogrpc"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
 	"vtool/vprometheus/metric"
+	"vtool/vservice/common"
 )
 
 func NewGrpcServerWithInterceptor() *grpc.Server {
@@ -25,11 +28,13 @@ func buildServer() *grpc.Server {
 	}
 	unaryInterceptors = append(unaryInterceptors,
 		grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
+		opentrace_go_grpc.OpenTracingServerInterceptor(opentracing.GlobalTracer(), opentrace_go_grpc.SpanDecorator(spanDecorator)),
 		monitorServerInterceptor(),
 	)
 
 	streamInterceptors = append(streamInterceptors,
 		grpc_recovery.StreamServerInterceptor(recoveryOpts...),
+		opentrace_go_grpc.OpenTracingStreamServerInterceptor(opentracing.GlobalTracer(), opentrace_go_grpc.SpanDecorator(spanDecorator)),
 		monitorStreamServerInterceptor(),
 	)
 
@@ -39,6 +44,25 @@ func buildServer() *grpc.Server {
 
 	serv := grpc.NewServer(opts...)
 	return serv
+}
+
+func spanDecorator(ctx context.Context,
+	span opentracing.Span,
+	method string,
+	req, resp interface{},
+	grpcError error) {
+	// todo more tag info added
+
+	servInfo := server.serviceBase.ServInfo()
+	if servInfo != nil {
+		serv, ok := servInfo.ServList[common.Grpc]
+		if ok {
+			span.SetTag("lane", servInfo.Lane)
+			span.SetTag("servIp", serv.Addr)
+			span.SetTag("engineType", serv.Type)
+		}
+	}
+
 }
 
 func monitorServerInterceptor() grpc.UnaryServerInterceptor {
