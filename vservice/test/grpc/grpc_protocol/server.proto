@@ -2,6 +2,8 @@ syntax = "proto3";
 
 import "Grpc.proto";
 
+//  protoc -I=. -I= {self location}/tool/idl/grpc
+// --go_out=plugins=grpc:. server.proto
 package test_server;
 
 message SayHelloReq {
