@@ -2,7 +2,7 @@ package engine
 
 import (
 	"context"
-	"github.com/apache/thrift/lib/go/thrift"
+	"git.apache.org/thrift.git/lib/go/thrift"
 	"vtool/vlog"
 	"vtool/vnet"
 	"vtool/vservice/common"

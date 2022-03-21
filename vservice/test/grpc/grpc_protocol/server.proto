@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "Grpc.proto";
+
+package test_server;
+
+message SayHelloReq {
+    sint64 helloType = 1;
+}
+
+message SayHelloData {
+    string val = 1;
+}
+
+message SayHelloRes {
+    SayHelloData data = 1;
+    grpcError.ErrInfo errInfo = 2;
+}
+
+service TestService {
+    rpc SayHello(SayHelloReq) returns (SayHelloRes);
+}

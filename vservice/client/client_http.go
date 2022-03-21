@@ -26,7 +26,7 @@ func NewHttpClient(cliConfig *common.ClientConfig) (*HttpClient, error) {
 	}
 	switch cliConfig.RegistrationType {
 	case common.ETCD:
-		client, err := etcd.NewEtcdClient(&etcd.ClientConfig{
+		client, err := etcd.NewEtcdHttpClient(&etcd.ClientConfig{
 			Cluster:   cliConfig.Cluster,
 			TimeOut:   common.DefaultTTl,
 			ServGroup: cliConfig.ServGroup,
@@ -37,7 +37,7 @@ func NewHttpClient(cliConfig *common.ClientConfig) (*HttpClient, error) {
 		}
 		c.client = client
 	case common.ZOOKEEPER:
-		client, err := zk.NewZkClient(&zk.ClientConfig{
+		client, err := zk.NewZkHttpClient(&zk.ClientConfig{
 			Cluster:   cliConfig.Cluster,
 			TimeOut:   common.DefaultTTl,
 			ServGroup: cliConfig.ServGroup,

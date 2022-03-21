@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "vtool/idl/grpc/grpcError";
+
+package grpcError;
+
+message ErrInfo {
+    int32 code = 1;
+    string msg = 2;
+}
+

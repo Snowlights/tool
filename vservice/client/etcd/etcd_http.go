@@ -26,7 +26,7 @@ type Client struct {
 	servLaneHash map[string]*consistent.Consistent
 }
 
-func NewEtcdClient(config *ClientConfig) (*Client, error) {
+func NewEtcdHttpClient(config *ClientConfig) (*Client, error) {
 	timeOut := common.DefaultTTl
 	if config.TimeOut > 0 {
 		timeOut = config.TimeOut

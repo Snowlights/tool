@@ -79,6 +79,7 @@ func (s *Server) awaitSignal() {
 	}
 }
 
+// todo change to environment
 func (s *Server) parseServiceInfo() (*servArgs, error) {
 	var serv, logDir, group, lane string
 	var registerType int64
@@ -111,5 +112,6 @@ func (s *Server) parseServiceInfo() (*servArgs, error) {
 		logDir:       logDir,
 		serviceLane:  lane,
 		registerType: common.RegistrationType(registerType),
+		cluster:      []string{"127.0.0.1:2379"},
 	}, nil
 }
