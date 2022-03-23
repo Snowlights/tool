@@ -1,3 +1,5 @@
 package client
 
-// todo thrift client
+// todo grpc client
+type GrpcClient struct {
+}

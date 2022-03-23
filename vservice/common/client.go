@@ -22,17 +22,17 @@ var DefaultHttpClient *http.Client = &http.Client{
 type Client interface {
 	GetAllServAddr() []*RegisterServiceInfo
 	GetServAddr(lane string, serviceType ServiceType, hashKey string) (*ServiceInfo, bool)
+	AddPoolHandler(func([]string))
 }
 
-type Caller interface {
-	Do(*ClientCallerArgs, interface{}) (interface{}, error)
+type RpcConn interface {
+	GetConn() interface{}
+	Close() error
 }
 
 type ClientCallerArgs struct {
-	Lane       string      `json:"lane"`
-	ServType   ServiceType `json:"serv_type"`
-	EngineType EngineType  `json:"engine_type"`
-	HashKey    string      `json:"hash_key"`
+	Lane    string `json:"lane"`
+	HashKey string `json:"hash_key"`
 }
 
 type HttpCallerOptions struct {

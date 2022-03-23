@@ -1,4 +1,4 @@
-package client
+package http
 
 import (
 	"fmt"
@@ -8,15 +8,11 @@ import (
 
 func TestHttpClient_Do(t *testing.T) {
 
-	var cli common.Caller
 	c, _ := NewHttpClient(&common.ClientConfig{
 		RegistrationType: 0,
 		Cluster:          nil,
 		ServGroup:        "",
 		ServName:         "",
 	})
-
-	cli = c
-
-	fmt.Println(cli)
+	fmt.Println(c)
 }

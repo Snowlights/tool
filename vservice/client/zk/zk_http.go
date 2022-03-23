@@ -24,9 +24,12 @@ type Client struct {
 	servMu       sync.Mutex
 	servList     []*common.RegisterServiceInfo
 	servLaneHash map[string]*consistent.Consistent
+
+	poolMu      sync.Mutex
+	handlerList []func([]string)
 }
 
-func NewZkHttpClient(config *ClientConfig) (*Client, error) {
+func NewZkClient(config *ClientConfig) (*Client, error) {
 	timeOut := common.DefaultTTl
 	if config.TimeOut > 0 {
 		timeOut = config.TimeOut
@@ -45,6 +48,26 @@ func NewZkHttpClient(config *ClientConfig) (*Client, error) {
 		servLaneHash: make(map[string]*consistent.Consistent),
 	}
 	return cli, nil
+}
+
+func (c *Client) AddPoolHandler(handle func([]string)) {
+	c.poolMu.Lock()
+	defer c.poolMu.Unlock()
+
+	c.handlerList = append(c.handlerList, handle)
+}
+
+func (c *Client) getPoolHandler() []func([]string) {
+	c.poolMu.Lock()
+	defer c.poolMu.Unlock()
+
+	return c.handlerList
+}
+
+func (c *Client) resetPool(addr []string) {
+	for _, handle := range c.getPoolHandler() {
+		handle(addr)
+	}
 }
 
 func (c *Client) GetAllServAddr() []*common.RegisterServiceInfo {
@@ -188,8 +211,32 @@ func (c *Client) reloadAllServ(ctx context.Context) error {
 		servHash[lane] = hash
 	}
 
+	go c.resetPool(c.diffServAndResetClientPool(servList))
 	c.updateServ(servList, servHash)
 	return nil
+}
+
+func (c *Client) diffServAndResetClientPool(servList []*common.RegisterServiceInfo) []string {
+	newIpMap, diffIpList := make(map[string]bool, len(servList)), make([]string, 0, len(servList))
+	for _, serv := range servList {
+		for _, s := range serv.ServList {
+			if s.Type == common.Rpc {
+				newIpMap[s.Addr] = true
+			}
+		}
+	}
+
+	c.servMu.Lock()
+	defer c.servMu.Unlock()
+
+	for _, serv := range servList {
+		for _, s := range serv.ServList {
+			if s.Type == common.Rpc && !newIpMap[s.Addr] {
+				diffIpList = append(diffIpList, s.Addr)
+			}
+		}
+	}
+	return diffIpList
 }
 
 func (c *Client) updateServ(servList []*common.RegisterServiceInfo, servHash map[string]*consistent.Consistent) {

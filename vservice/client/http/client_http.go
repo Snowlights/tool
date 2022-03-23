@@ -1,4 +1,4 @@
-package client
+package http
 
 import (
 	"bytes"
@@ -9,8 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"vtool/vservice/client/etcd"
-	"vtool/vservice/client/zk"
+	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/common"
 )
 
@@ -21,36 +20,13 @@ type HttpClient struct {
 }
 
 func NewHttpClient(cliConfig *common.ClientConfig) (*HttpClient, error) {
-	c := &HttpClient{
-		client: nil,
-	}
-	switch cliConfig.RegistrationType {
-	case common.ETCD:
-		client, err := etcd.NewEtcdHttpClient(&etcd.ClientConfig{
-			Cluster:   cliConfig.Cluster,
-			TimeOut:   common.DefaultTTl,
-			ServGroup: cliConfig.ServGroup,
-			ServName:  cliConfig.ServName,
-		})
-		if err != nil {
-			return nil, err
-		}
-		c.client = client
-	case common.ZOOKEEPER:
-		client, err := zk.NewZkHttpClient(&zk.ClientConfig{
-			Cluster:   cliConfig.Cluster,
-			TimeOut:   common.DefaultTTl,
-			ServGroup: cliConfig.ServGroup,
-			ServName:  cliConfig.ServName,
-		})
-		if err != nil {
-			return nil, err
-		}
-		c.client = client
-	default:
-		return nil, common.UnSupportedRegistrationType
-	}
+	c := &HttpClient{}
 
+	cli, err := clientCommon.NewClientWithClientConfig(cliConfig)
+	if err != nil {
+		return nil, err
+	}
+	c.client = cli
 	return c, nil
 }
 
@@ -70,12 +46,12 @@ func (hc HttpClient) Do(args *common.ClientCallerArgs, option interface{}) (inte
 		args.HashKey = strconv.FormatInt(rand.Int63n(100), 10)
 	}
 
-	serv, ok := hc.client.GetServAddr(args.Lane, args.ServType, args.HashKey)
+	serv, ok := hc.client.GetServAddr(args.Lane, common.HTTP, args.HashKey)
 	if !ok {
 		return nil, fmt.Errorf("%s caller args is %+v", common.NotFoundServInfo, args)
 	}
 
-	if serv.Type != args.EngineType {
+	if serv.Type != common.Gin {
 		return nil, fmt.Errorf("%s serv info is %+v, caller args is %+v", common.NotFoundServEngine, serv, args)
 	}
 
