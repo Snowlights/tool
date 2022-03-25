@@ -1,15 +1,14 @@
-package thrift
+package grpc
 
-import "git.apache.org/thrift.git/lib/go/thrift"
+import "google.golang.org/grpc"
 
 type ClientConn struct {
-	thriftSocket  *thrift.TSocket
-	transport     thrift.TTransport
 	serviceClient interface{}
+	conn          *grpc.ClientConn
 }
 
 func (c *ClientConn) Close() error {
-	return c.transport.Close()
+	return c.conn.Close()
 }
 
 func (c *ClientConn) GetConn() interface{} {

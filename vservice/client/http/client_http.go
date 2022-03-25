@@ -5,9 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/common"
@@ -42,8 +40,7 @@ func (hc HttpClient) Do(args *common.ClientCallerArgs, option interface{}) (inte
 	}
 
 	if len(args.HashKey) == 0 {
-		rand.Seed(int64(time.Now().Nanosecond()))
-		args.HashKey = strconv.FormatInt(rand.Int63n(100), 10)
+		args.HashKey = clientCommon.NewHashKey()
 	}
 
 	serv, ok := hc.client.GetServAddr(args.Lane, common.HTTP, args.HashKey)
@@ -55,13 +52,13 @@ func (hc HttpClient) Do(args *common.ClientCallerArgs, option interface{}) (inte
 		return nil, fmt.Errorf("%s serv info is %+v, caller args is %+v", common.NotFoundServEngine, serv, args)
 	}
 
-	return hc.do(serv, opt)
+	return hc.do(serv, opt, args.TimeOut)
 }
 
-func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptions) (interface{}, error) {
+func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptions, timeout time.Duration) (interface{}, error) {
 
-	if option.Duration == 0 {
-		option.Duration = common.DefaultMaxTimeOut
+	if timeout == 0 {
+		timeout = common.DefaultMaxTimeOut
 	}
 
 	url := common.HttpPrefix + serv.Addr + option.API
@@ -72,7 +69,7 @@ func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptio
 	}
 	request.Header.Set("Connection", "Keep-Alive")
 	ctx, cancel := context.WithCancel(context.TODO())
-	time.AfterFunc(option.Duration, func() {
+	time.AfterFunc(timeout, func() {
 		cancel()
 	})
 	request = request.WithContext(ctx)

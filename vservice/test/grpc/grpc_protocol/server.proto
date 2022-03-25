@@ -4,7 +4,7 @@ import "Grpc.proto";
 
 //  protoc -I=. -I= {self location}/tool/idl/grpc
 // --go_out=plugins=grpc:. server.proto
-package test_server;
+package testService;
 
 message SayHelloReq {
     sint64 helloType = 1;

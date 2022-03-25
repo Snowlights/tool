@@ -28,13 +28,13 @@ func buildServer() *grpc.Server {
 	}
 	unaryInterceptors = append(unaryInterceptors,
 		grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
-		opentrace_go_grpc.OpenTracingServerInterceptor(opentracing.GlobalTracer(), opentrace_go_grpc.SpanDecorator(spanDecorator)),
+		opentrace_go_grpc.OpenTracingServerInterceptor(opentracing.GlobalTracer(), opentrace_go_grpc.SpanDecorator(SpanDecorator)),
 		monitorServerInterceptor(),
 	)
 
 	streamInterceptors = append(streamInterceptors,
 		grpc_recovery.StreamServerInterceptor(recoveryOpts...),
-		opentrace_go_grpc.OpenTracingStreamServerInterceptor(opentracing.GlobalTracer(), opentrace_go_grpc.SpanDecorator(spanDecorator)),
+		opentrace_go_grpc.OpenTracingStreamServerInterceptor(opentracing.GlobalTracer(), opentrace_go_grpc.SpanDecorator(SpanDecorator)),
 		monitorStreamServerInterceptor(),
 	)
 
@@ -46,21 +46,25 @@ func buildServer() *grpc.Server {
 	return serv
 }
 
-func spanDecorator(ctx context.Context,
+func SpanDecorator(ctx context.Context,
 	span opentracing.Span,
 	method string,
 	req, resp interface{},
 	grpcError error) {
 	// todo more tag info added
 
-	servInfo := server.serviceBase.ServInfo()
-	if servInfo != nil {
-		serv, ok := servInfo.ServList[common.Grpc]
-		if ok {
-			span.SetTag("lane", servInfo.Lane)
-			span.SetTag("servIp", serv.Addr)
-			span.SetTag("engineType", serv.Type)
+	servBase := GetServBase()
+	if servBase != nil {
+		servInfo := servBase.ServInfo()
+		if servInfo != nil {
+			serv, ok := servInfo.ServList[common.Grpc]
+			if ok {
+				span.SetTag("lane", servInfo.Lane)
+				span.SetTag("servIp", serv.Addr)
+				span.SetTag("engineType", serv.Type)
+			}
 		}
+
 	}
 
 }

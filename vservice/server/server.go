@@ -31,6 +31,10 @@ type servArgs struct {
 	cluster []string
 }
 
+func GetServBase() common.ServerBase {
+	return server.serviceBase
+}
+
 func ServService(props map[common.ServiceType]common.Processor) error {
 	return server.serv(props)
 }

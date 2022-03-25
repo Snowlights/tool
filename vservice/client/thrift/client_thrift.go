@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"time"
 	"vtool/vlog"
+	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/client/pool"
 	"vtool/vservice/common"
 )
-
-// todo thrift client
 
 type ThriftClient struct {
 	client common.Client
@@ -19,34 +19,40 @@ type ThriftClient struct {
 	clientPool *pool.ClientPool
 }
 
-func NewThriftClient(client common.Client, servCli func(thrift.TTransport, thrift.TProtocolFactory) interface{}) *ThriftClient {
+func NewThriftClient(client common.Client, servCli func(thrift.TTransport, thrift.TProtocolFactory) interface{}) common.RpcClient {
 
 	tc := &ThriftClient{
 		client:        client,
 		serviceClient: servCli,
 	}
-
+	tc.clientPool = pool.NewClientPool(&pool.ClientPoolConfig{
+		ServiceName: client.ServName(),
+		Idle:        pool.DefaultIdle,
+		Active:      pool.DefaultMaxActive,
+		IdleTimeout: pool.DefaultIdleTimeout,
+		Wait:        true,
+		WaitTimeOut: time.Second * 3,
+		StatTime:    pool.DefaultStatTime,
+	}, tc.newConn)
 	tc.client.AddPoolHandler(tc.deleteAddrHandler)
 	return tc
 }
 
-func (t *ThriftClient) deleteAddrHandler(addr []string) {
-	for _, addr := range addr {
-		t.clientPool.Delete(context.Background(), addr)
-	}
-}
+func (t *ThriftClient) Rpc(args *common.ClientCallerArgs, fnRpc func(interface{}) error) error {
 
-func (t *ThriftClient) Rpc(args *common.ClientCallerArgs, fnRpc func(interface{}) error) (interface{}, error) {
+	if len(args.HashKey) == 0 {
+		args.HashKey = clientCommon.NewHashKey()
+	}
 
 	serv, ok := t.client.GetServAddr(args.Lane, common.Thrift, args.HashKey)
 	if !ok {
-		return nil, fmt.Errorf("%s caller args is %+v", common.NotFoundServInfo, args)
+		return fmt.Errorf("%s caller args is %+v", common.NotFoundServInfo, args)
 	}
 	if serv.Type != common.Rpc {
-		return nil, fmt.Errorf("%s serv info is %+v, caller args is %+v", common.NotFoundServEngine, serv, args)
+		return fmt.Errorf("%s serv info is %+v, caller args is %+v", common.NotFoundServEngine, serv, args)
 	}
 
-	return nil, t.do(context.TODO(), serv, fnRpc)
+	return t.do(context.TODO(), serv, fnRpc)
 }
 
 func (t *ThriftClient) do(ctx context.Context, serv *common.ServiceInfo, fnRpc func(interface{}) error) error {
@@ -69,6 +75,12 @@ func (t *ThriftClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc 
 	}
 
 	return fnRpc(conn.GetConn())
+}
+
+func (t *ThriftClient) deleteAddrHandler(addr []string) {
+	for _, addr := range addr {
+		t.clientPool.Delete(context.Background(), addr)
+	}
 }
 
 func (t *ThriftClient) newConn(addr string) (common.RpcConn, error) {

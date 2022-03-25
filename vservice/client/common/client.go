@@ -1,6 +1,9 @@
 package common
 
 import (
+	"math/rand"
+	"strconv"
+	"time"
 	"vtool/vservice/client/etcd"
 	"vtool/vservice/client/zk"
 	"vtool/vservice/common"
@@ -33,4 +36,9 @@ func NewClientWithClientConfig(cliConfig *common.ClientConfig) (common.Client, e
 	default:
 		return nil, common.UnSupportedRegistrationType
 	}
+}
+
+func NewHashKey() string {
+	rand.Seed(int64(time.Now().Nanosecond()))
+	return strconv.FormatInt(rand.Int63(), 10)
 }

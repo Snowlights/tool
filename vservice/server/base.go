@@ -73,11 +73,11 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 		return err
 	}
 
+	serv.ServPath = sb.path
 	val, err := json.Marshal(serv)
 	if err != nil {
 		return err
 	}
-	serv.ServPath = sb.path
 
 	servID, err := sb.register.Register(ctx, sb.path, string(val), sb.ttl)
 	if err != nil {

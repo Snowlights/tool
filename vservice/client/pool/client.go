@@ -10,15 +10,15 @@ import (
 const getConnTimeout = time.Second
 
 type ClientPoolConfig struct {
-	serviceName string
+	ServiceName string
 
-	idle, active int
-	idleTimeout  time.Duration
+	Idle, Active int
+	IdleTimeout  time.Duration
 
-	wait        bool
-	waitTimeOut time.Duration
+	Wait        bool
+	WaitTimeOut time.Duration
 
-	statTime time.Duration
+	StatTime time.Duration
 }
 
 type ClientPool struct {
@@ -46,14 +46,14 @@ func (c *ClientPool) getPool(serv *common.ServiceInfo) *ConnPool {
 			cp = value.(*ConnPool)
 		} else {
 			cp = NewConnPool(&ConnPoolConfig{
-				serviceName: c.conf.serviceName,
+				serviceName: c.conf.ServiceName,
 				addr:        serv.Addr,
-				idle:        c.conf.idle,
-				maxActive:   c.conf.active,
-				idleTimeout: c.conf.idleTimeout,
-				wait:        c.conf.wait,
-				waitTimeOut: c.conf.waitTimeOut,
-				statTime:    c.conf.statTime,
+				idle:        c.conf.Idle,
+				maxActive:   c.conf.Active,
+				idleTimeout: c.conf.IdleTimeout,
+				wait:        c.conf.Wait,
+				waitTimeOut: c.conf.WaitTimeOut,
+				statTime:    c.conf.StatTime,
 			}, c.newConn)
 			c.clientPool.Store(serv.Addr, cp)
 		}

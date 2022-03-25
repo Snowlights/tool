@@ -3,15 +3,17 @@ package pool
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 	"vtool/vservice/common"
 )
 
 const (
-	defaultStatTime  = time.Millisecond * 100
-	defaultIdle      = 128
-	defaultMaxActive = 256
+	DefaultStatTime    = time.Millisecond * 100
+	DefaultIdle        = 128
+	DefaultMaxActive   = 256
+	DefaultIdleTimeout = time.Minute
 )
 
 type ConnPool struct {
@@ -54,17 +56,17 @@ func (ci *connItem) expire(timeout time.Duration) bool {
 func NewConnPool(conf *ConnPoolConfig, newConn func(string) (common.RpcConn, error)) *ConnPool {
 
 	if conf.statTime == 0 {
-		conf.statTime = defaultStatTime
+		conf.statTime = DefaultStatTime
 	}
 	if conf.idle == 0 {
-		conf.idle = defaultIdle
+		conf.idle = DefaultIdle
 	}
 	if conf.maxActive == 0 {
-		conf.idle = defaultMaxActive
+		conf.idle = DefaultMaxActive
 	}
 	if conf.maxActive > conf.idle {
-		conf.maxActive = defaultMaxActive
-		conf.idle = defaultIdle
+		conf.maxActive = DefaultMaxActive
+		conf.idle = DefaultIdle
 	}
 
 	c := &ConnPool{
@@ -85,6 +87,7 @@ func (cp *ConnPool) stat() {
 
 	ticker := time.NewTicker(cp.conf.statTime)
 	for {
+		fmt.Println("stat", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
 		select {
 		case <-ticker.C:
 			cp.mu.Lock()
@@ -129,7 +132,7 @@ func (cp *ConnPool) Get(ctx context.Context) (common.RpcConn, error) {
 		cp.mu.Unlock()
 		return nil, nil
 	}
-
+	fmt.Println("Get", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
 	for {
 		for index, length := 0, cp.connList.Len(); index < length; index++ {
 			e := cp.connList.Front()
@@ -187,14 +190,17 @@ func (cp *ConnPool) Get(ctx context.Context) (common.RpcConn, error) {
 
 func (cp *ConnPool) Put(ctx context.Context, rpcConn common.RpcConn) error {
 	cp.mu.Lock()
+	fmt.Println("Put", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
+
 	if cp.closed {
 		cp.mu.Unlock()
 		return nil
 	}
 
 	if cp.connList.Len() > cp.active {
-		rpcConn.Close()
+		cp.active--
 		cp.mu.Unlock()
+		rpcConn.Close()
 		return nil
 	}
 
@@ -207,12 +213,12 @@ func (cp *ConnPool) Put(ctx context.Context, rpcConn common.RpcConn) error {
 	} else {
 		rpcConn = nil
 	}
+	cp.active--
+	cp.mu.Unlock()
+
 	if rpcConn == nil {
-		cp.mu.Unlock()
 		return nil
 	}
 
-	cp.active--
-	cp.mu.Unlock()
 	return rpcConn.Close()
 }

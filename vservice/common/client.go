@@ -23,6 +23,11 @@ type Client interface {
 	GetAllServAddr() []*RegisterServiceInfo
 	GetServAddr(lane string, serviceType ServiceType, hashKey string) (*ServiceInfo, bool)
 	AddPoolHandler(func([]string))
+	ServName() string
+}
+
+type RpcClient interface {
+	Rpc(*ClientCallerArgs, func(interface{}) error) error
 }
 
 type RpcConn interface {
@@ -31,15 +36,15 @@ type RpcConn interface {
 }
 
 type ClientCallerArgs struct {
-	Lane    string `json:"lane"`
-	HashKey string `json:"hash_key"`
+	Lane    string        `json:"lane"`
+	HashKey string        `json:"hash_key"`
+	TimeOut time.Duration `json:"time_out"`
 }
 
 type HttpCallerOptions struct {
-	Method   string        `json:"method"`
-	API      string        `json:"api"`
-	Body     []byte        `json:"body"`
-	Duration time.Duration `json:"duration"`
+	Method string `json:"method"`
+	API    string `json:"api"`
+	Body   []byte `json:"body"`
 }
 
 type ClientConfig struct {
