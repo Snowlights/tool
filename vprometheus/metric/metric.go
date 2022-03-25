@@ -48,7 +48,7 @@ func (p ProcessMonitor) reload(ctx context.Context) {
 
 func (p ProcessMonitor) statApi(api string, duration time.Duration) {
 	_metricAPIRequestCount.With(group, p.Group, service, p.Service, serviceLabelType, api).Inc()
-	_metricAPIRequestTime.With(group, p.Group, service, p.Service, serviceLabelType, api).Observe(float64(duration.Nanoseconds() / 1e6))
+	_metricAPIRequestTime.With(group, p.Group, service, p.Service, serviceLabelType, api).Observe(float64(duration / time.Millisecond))
 }
 
 func (p ProcessMonitor) work() {

@@ -73,11 +73,11 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 		return err
 	}
 
+	serv.ServPath = sb.path
 	val, err := json.Marshal(serv)
 	if err != nil {
 		return err
 	}
-	serv.ServPath = sb.path
 
 	servID, err := sb.register.Register(ctx, sb.path, string(val), sb.ttl)
 	if err != nil {
@@ -149,17 +149,10 @@ func (sb *ServiceBase) ServGroup() string {
 	return sb.group
 }
 
-func (sb *ServiceBase) ServInfo() map[common.ServiceType]*common.ServiceInfo {
-	m := make(map[common.ServiceType]*common.ServiceInfo, len(sb.val.ServPath))
-	for k, v := range sb.val.ServList {
-		m[k] = func() *common.ServiceInfo {
-			return &common.ServiceInfo{
-				Type: v.Type,
-				Addr: v.Addr,
-			}
-		}()
-	}
-	return m
+func (sb *ServiceBase) ServInfo() *common.RegisterServiceInfo {
+	f := new(common.RegisterServiceInfo)
+	f = sb.val
+	return f
 }
 
 func (sb *ServiceBase) FullServiceRegisterPath() string {

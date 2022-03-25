@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "Grpc.proto";
+
+//  protoc -I=. -I= {self location}/tool/idl/grpc
+// --go_out=plugins=grpc:. server.proto
+package testService;
+
+message SayHelloReq {
+    sint64 helloType = 1;
+}
+
+message SayHelloData {
+    string val = 1;
+}
+
+message SayHelloRes {
+    SayHelloData data = 1;
+    grpcError.ErrInfo errInfo = 2;
+}
+
+service TestService {
+    rpc SayHello(SayHelloReq) returns (SayHelloRes);
+}

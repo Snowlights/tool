@@ -1,0 +1,99 @@
+package pool
+
+import (
+	"context"
+	"sync"
+	"time"
+	"vtool/vservice/common"
+)
+
+const getConnTimeout = time.Second
+
+type ClientPoolConfig struct {
+	ServiceName string
+
+	Idle, Active int
+	IdleTimeout  time.Duration
+
+	Wait        bool
+	WaitTimeOut time.Duration
+
+	StatTime time.Duration
+}
+
+type ClientPool struct {
+	conf    *ClientPoolConfig
+	newConn func(string) (common.RpcConn, error)
+
+	mu         sync.Mutex
+	clientPool sync.Map
+}
+
+func NewClientPool(conf *ClientPoolConfig, newConn func(string) (common.RpcConn, error)) *ClientPool {
+	return &ClientPool{conf: conf, newConn: newConn}
+}
+
+func (c *ClientPool) getPool(serv *common.ServiceInfo) *ConnPool {
+	var cp *ConnPool
+	value, ok := c.clientPool.Load(serv.Addr)
+	if ok == true {
+		cp = value.(*ConnPool)
+	} else {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		value, ok := c.clientPool.Load(serv.Addr)
+		if ok == true {
+			cp = value.(*ConnPool)
+		} else {
+			cp = NewConnPool(&ConnPoolConfig{
+				serviceName: c.conf.ServiceName,
+				addr:        serv.Addr,
+				idle:        c.conf.Idle,
+				maxActive:   c.conf.Active,
+				idleTimeout: c.conf.IdleTimeout,
+				wait:        c.conf.Wait,
+				waitTimeOut: c.conf.WaitTimeOut,
+				statTime:    c.conf.StatTime,
+			}, c.newConn)
+			c.clientPool.Store(serv.Addr, cp)
+		}
+	}
+	return cp
+}
+
+func (c *ClientPool) Delete(ctx context.Context, addr string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	value, ok := c.clientPool.Load(addr)
+	if !ok {
+		return
+	}
+	connPool, ok := value.(*ConnPool)
+	if !ok {
+		return
+	}
+	c.clientPool.Delete(addr)
+	connPool.Close()
+	return
+}
+
+func (c *ClientPool) Get(ctx context.Context, serv *common.ServiceInfo) (common.RpcConn, error) {
+	cp := c.getPool(serv)
+	ctx, cancel := context.WithTimeout(ctx, getConnTimeout)
+	defer cancel()
+	return cp.Get(ctx)
+}
+
+func (c *ClientPool) Close() {
+	closeConnectionPool := func(key, value interface{}) bool {
+		if connectionPool, ok := value.(*ConnPool); ok {
+			connectionPool.Close()
+		}
+		return true
+	}
+	c.clientPool.Range(closeConnectionPool)
+}
+
+func (c *ClientPool) Put(ctx context.Context, serv *common.ServiceInfo, conn common.RpcConn) error {
+	return c.getPool(serv).Put(ctx, conn)
+}

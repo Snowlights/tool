@@ -13,4 +13,8 @@ var (
 	LogDirIsNil       = errors.New("logDir can not be nil")
 )
 
-var ()
+var (
+	NotFoundServInfo     = errors.New("not found service info ")
+	NotFoundServEngine   = errors.New("not found service engine")
+	NeedHttpCallerOption = errors.New("need http caller options")
+)

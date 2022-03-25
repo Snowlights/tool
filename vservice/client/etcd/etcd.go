@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strconv"
 	"strings"
@@ -24,6 +25,9 @@ type Client struct {
 	servMu       sync.Mutex
 	servList     []*common.RegisterServiceInfo
 	servLaneHash map[string]*consistent.Consistent
+
+	poolMu      sync.Mutex
+	handlerList []func([]string)
 }
 
 func NewEtcdClient(config *ClientConfig) (*Client, error) {
@@ -48,10 +52,35 @@ func NewEtcdClient(config *ClientConfig) (*Client, error) {
 		baseLoc:      common.DefaultRegisterPath,
 		servLaneHash: make(map[string]*consistent.Consistent),
 	}
+	cli.reloadAllServ(context.Background())
+	go cli.watch(context.Background())
 	return cli, nil
 }
 
-//
+func (c *Client) AddPoolHandler(handle func([]string)) {
+	c.poolMu.Lock()
+	defer c.poolMu.Unlock()
+
+	c.handlerList = append(c.handlerList, handle)
+}
+
+func (c *Client) getPoolHandler() []func([]string) {
+	c.poolMu.Lock()
+	defer c.poolMu.Unlock()
+
+	return c.handlerList
+}
+
+func (c *Client) resetPool(addr []string) {
+	for _, handle := range c.getPoolHandler() {
+		handle(addr)
+	}
+}
+
+func (c *Client) ServName() string {
+	return c.servName
+}
+
 func (c *Client) GetServAddr(lane string, serviceType common.ServiceType, hashKey string) (*common.ServiceInfo, bool) {
 	ctx := context.Background()
 	c.servMu.Lock()
@@ -65,20 +94,20 @@ func (c *Client) GetServAddr(lane string, serviceType common.ServiceType, hashKe
 	if !ok {
 		hash, ok = c.servLaneHash[""]
 		if !ok {
-			vlog.ErrorF(ctx, "c.servLaneHash[\"\"] == nil, serv path:%s hash circle lane:%s key:%s", c.servPath(), lane, hashKey)
+			vlog.ErrorF(ctx, "c.servLaneHash[] == nil, serv path:%s, lane:%s, hashKey:%s", c.servPath(), lane, hashKey)
 			return nil, false
 		}
 	}
 
 	key, err := hash.Get(hashKey)
 	if err != nil {
-		vlog.ErrorF(ctx, "hash get serv key failed, error is %s, serv path:%s hash circle lane:%s key:%s", err.Error(), c.servPath(), lane, hashKey)
+		vlog.ErrorF(ctx, "hash get serv key failed, error is %s, serv path:%s, lane:%s, hashKey:%s", err.Error(), c.servPath(), lane, hashKey)
 		return nil, false
 	}
 
+	fmt.Println(key, hashKey)
 	servPathPartIndex := strings.LastIndex(key, common.HashKey)
 	servPath := key[:servPathPartIndex]
-
 	for _, serv := range c.servList {
 		if servPath == serv.ServPath && lane == serv.Lane {
 			servInfo, ok := serv.ServList[serviceType]
@@ -153,11 +182,17 @@ func (c *Client) reloadAllServ(ctx context.Context) error {
 		if err != nil {
 			continue
 		}
-
-		keyList := make([]string, 0, common.ServWeight)
+		val.ServPath = string(v.Key)
+		var keyList []string
+		if _, ok := servLaneToHashKeyList[val.Lane]; ok {
+			keyList = servLaneToHashKeyList[val.Lane]
+		} else {
+			keyList = make([]string, 0, common.ServWeight)
+		}
 		for i := 0; i < common.ServWeight; i++ {
 			keyList = append(keyList, strings.Join([]string{val.ServPath, strconv.FormatInt(int64(i), 10)}, common.HashKey))
 		}
+		servList = append(servList, val)
 		servLaneToHashKeyList[val.Lane] = keyList
 	}
 
@@ -170,8 +205,32 @@ func (c *Client) reloadAllServ(ctx context.Context) error {
 		servHash[lane] = hash
 	}
 
+	go c.resetPool(c.diffServAndResetClientPool(servList))
 	c.updateServ(servList, servHash)
 	return nil
+}
+
+func (c *Client) diffServAndResetClientPool(servList []*common.RegisterServiceInfo) []string {
+	newIpMap, diffIpList := make(map[string]bool, len(servList)), make([]string, 0, len(servList))
+	for _, serv := range servList {
+		for _, s := range serv.ServList {
+			if s.Type == common.Rpc {
+				newIpMap[s.Addr] = true
+			}
+		}
+	}
+
+	c.servMu.Lock()
+	defer c.servMu.Unlock()
+
+	for _, serv := range servList {
+		for _, s := range serv.ServList {
+			if s.Type == common.Rpc && !newIpMap[s.Addr] {
+				diffIpList = append(diffIpList, s.Addr)
+			}
+		}
+	}
+	return diffIpList
 }
 
 func (c *Client) updateServ(servList []*common.RegisterServiceInfo, servHash map[string]*consistent.Consistent) {

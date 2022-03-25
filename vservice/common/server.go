@@ -20,7 +20,7 @@ type ServerBase interface {
 
 	ServName() string
 	ServGroup() string
-	ServInfo() map[ServiceType]*ServiceInfo
+	ServInfo() *RegisterServiceInfo
 
 	FullServiceRegisterPath() string
 

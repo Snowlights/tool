@@ -43,7 +43,7 @@ func (c *Register) Register(ctx context.Context, path, val string, ttl time.Dura
 
 		err = c.register(ctx, servPath, val, ttl)
 		if err == nil {
-			vlog.InfoF(ctx, servPath, val, "register success")
+			vlog.Info(ctx, servPath, val, "register success")
 			return id, nil
 		} else {
 			vlog.ErrorF(ctx, servPath, val, "register failed error is %s", err.Error())
@@ -158,16 +158,13 @@ func (c *Register) GetNode(ctx context.Context, path string) ([]*common.Register
 			}
 			return nil, err
 		}
-		val := make(map[common.ServiceType]*common.ServiceInfo, 1)
+		val := new(common.RegisterServiceInfo)
 		err = json.Unmarshal(data, &val)
 		if err != nil {
 			continue
 		}
-		node := &common.RegisterServiceInfo{
-			ServPath: fullPath,
-			ServList: val,
-		}
-		nodeList = append(nodeList, node)
+		val.ServPath = string(fullPath)
+		nodeList = append(nodeList, val)
 	}
 
 	return nodeList, nil

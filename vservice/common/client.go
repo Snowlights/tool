@@ -1,6 +1,9 @@
 package common
 
-import "time"
+import (
+	"net/http"
+	"time"
+)
 
 const (
 	HashKey = "-"
@@ -8,9 +11,40 @@ const (
 	DefaultMaxTimeOut = time.Second * 10
 )
 
+var DefaultHttpClient *http.Client = &http.Client{
+	Transport: &http.Transport{
+		MaxIdleConnsPerHost: 128,
+		MaxConnsPerHost:     1024,
+	},
+	Timeout: 0,
+}
+
 type Client interface {
 	GetAllServAddr() []*RegisterServiceInfo
 	GetServAddr(lane string, serviceType ServiceType, hashKey string) (*ServiceInfo, bool)
+	AddPoolHandler(func([]string))
+	ServName() string
+}
+
+type RpcClient interface {
+	Rpc(*ClientCallerArgs, func(interface{}) error) error
+}
+
+type RpcConn interface {
+	GetConn() interface{}
+	Close() error
+}
+
+type ClientCallerArgs struct {
+	Lane    string        `json:"lane"`
+	HashKey string        `json:"hash_key"`
+	TimeOut time.Duration `json:"time_out"`
+}
+
+type HttpCallerOptions struct {
+	Method string `json:"method"`
+	API    string `json:"api"`
+	Body   []byte `json:"body"`
 }
 
 type ClientConfig struct {
