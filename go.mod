@@ -5,7 +5,7 @@ go 1.15
 require (
 	git.apache.org/thrift.git v0.0.0-20150427210205-dc799ca07862
 	github.com/Snowlights/gogrpc v0.0.0-20220317041425-3788e34bdf78
-	github.com/apolloconfig/agollo/v4 v4.1.0 // indirect
+	github.com/apolloconfig/agollo/v4 v4.1.0
 	github.com/coocood/freecache v1.2.1 // indirect
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang/protobuf v1.5.2
