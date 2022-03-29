@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"vtool/vlog"
 	"vtool/vservice/common"
 )
 
@@ -45,6 +46,8 @@ type connItem struct {
 	addTime time.Time
 	conn    common.RpcConn
 }
+
+// todo reset pool config
 
 func (ci *connItem) expire(timeout time.Duration) bool {
 	if timeout <= 0 {
@@ -87,7 +90,7 @@ func (cp *ConnPool) stat() {
 
 	ticker := time.NewTicker(cp.conf.statTime)
 	for {
-		fmt.Println("stat", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
+		vlog.DebugF(context.Background(), fmt.Sprintf("ConnPool.stat, cp.active:%d, cp.idle:%d ", cp.active, cp.connList.Len()))
 		select {
 		case <-ticker.C:
 			cp.mu.Lock()

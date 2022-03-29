@@ -81,6 +81,10 @@ func (c *Client) ServName() string {
 	return c.servName
 }
 
+func (c *Client) ServGroup() string {
+	return c.servGroup
+}
+
 func (c *Client) GetServAddr(lane string, serviceType common.ServiceType, hashKey string) (*common.ServiceInfo, bool) {
 	ctx := context.Background()
 	c.servMu.Lock()

@@ -5,10 +5,15 @@ import (
 	"github.com/apolloconfig/agollo/v4"
 	"github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/storage"
+	"os"
 	"testing"
 	"time"
 	"vtool/parse"
 )
+
+func TestParseConfigEnv(t *testing.T) {
+	fmt.Println(os.Getenv(APOLLO_CLUSTER))
+}
 
 func TestNewConfig(t *testing.T) {
 

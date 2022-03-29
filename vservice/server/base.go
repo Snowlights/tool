@@ -4,7 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap/zapcore"
+	"strconv"
 	"time"
+	"vtool/parse"
+	"vtool/vconfig"
 	"vtool/vlog"
 	"vtool/vprometheus/metric"
 	"vtool/vprometheus/vcollector"
@@ -15,7 +19,14 @@ import (
 )
 
 type ServiceBase struct {
-	// todo change to apollo
+	center vconfig.Center
+
+	// todo add db open api
+	// todo add redis open api
+	// todo add mq open api
+
+	// todo: log log time, add region and cross region and colony config
+
 	register       common.Register
 	metricRegister common.Register
 
@@ -27,6 +38,9 @@ type ServiceBase struct {
 
 	servAddr string
 
+	md5     string
+	version int64
+
 	path string
 	val  *common.RegisterServiceInfo
 	ttl  time.Duration
@@ -35,36 +49,35 @@ type ServiceBase struct {
 }
 
 func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
-	regEngine, err := register.GetRegisterEngine(&common.RegisterConfig{
-		RegistrationType: args.registerType,
-		Cluster:          args.cluster,
-	})
-	if err != nil {
-		return nil, err
-	}
 
-	metricRegister, err := consul.NewRegistry(&consul.RegisterConfig{
-		Host:  common.ConsulDefaultHost,
-		Port:  common.ConsulDefaultPort,
-		Token: common.ConsulDefaultToken,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &ServiceBase{
-		register:       regEngine,
-		metricRegister: metricRegister,
-		baseLoc:        common.DefaultRegisterPath,
-		name:           args.serviceName,
-		group:          args.serviceGroup,
-		lane:           args.serviceLane,
-		path:           common.DefaultRegisterPath + common.Slash + args.serviceGroup + common.Slash + args.serviceName,
-		ttl:            common.DefaultTTl,
+	servBase := &ServiceBase{
+		baseLoc: common.DefaultRegisterPath,
+		name:    args.serviceName,
+		group:   args.serviceGroup,
+		lane:    args.serviceLane,
+		version: args.version,
+		path:    common.DefaultRegisterPath + common.Slash + args.serviceGroup + common.Slash + args.serviceName,
+		ttl:     common.DefaultTTl,
 		shutDown: func() {
 			vlog.InfoF(ctx, "service quit ~")
 		},
-	}, nil
+	}
+
+	err := servBase.initCenter(args)
+	if err != nil {
+		return nil, err
+	}
+
+	err = servBase.initRegisterEngines()
+	if err != nil {
+		return nil, err
+	}
+
+	return servBase, nil
+}
+
+func (sb *ServiceBase) GetCenter(ctx context.Context) vconfig.Center {
+	return sb.center
 }
 
 func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceType]common.Processor) error {
@@ -91,13 +104,125 @@ func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceTyp
 	return nil
 }
 
-func (sb *ServiceBase) initMetric(ctx context.Context) error {
-	metric.InitBaseMetric(ctx, sb.group, sb.name, sb.ID)
+func (sb *ServiceBase) ServName() string {
+	return sb.name
+}
 
+func (sb *ServiceBase) ServGroup() string {
+	return sb.group
+}
+
+func (sb *ServiceBase) ServInfo() *common.RegisterServiceInfo {
+	f := new(common.RegisterServiceInfo)
+	f = sb.val
+	return f
+}
+
+func (sb *ServiceBase) FullServiceRegisterPath() string {
+	return sb.path + common.Slash + sb.ID
+}
+
+func (sb *ServiceBase) Stop() {
+	ctx := context.Background()
+	sb.register.UnRegister(ctx, sb.FullServiceRegisterPath())
+	sb.metricRegister.UnRegister(ctx, sb.FullServiceRegisterPath())
+	sb.shutDown()
+}
+
+func (sb *ServiceBase) initRegisterEngines() error {
+
+	serverConfig := new(vconfig.ServerConfig)
+	err := sb.center.UnmarshalWithNameSpace(vconfig.Server, parse.PropertiesTagName, serverConfig)
+	if err != nil {
+		return err
+	}
+
+	regEngine, err := register.GetRegisterEngine(&common.RegisterConfig{
+		RegistrationType: common.RegistrationType(serverConfig.RegisterType),
+		Cluster:          serverConfig.RegisterCluster,
+	})
+	if err != nil {
+		return err
+	}
+	sb.register = regEngine
+
+	if serverConfig.NeedMetric {
+		metricEngine, err := consul.NewRegistry(&consul.RegisterConfig{
+			Host:  serverConfig.ConsulHost,
+			Port:  serverConfig.ConsulPort,
+			Token: serverConfig.ConsulToken,
+		})
+		if err == nil {
+			sb.metricRegister = metricEngine
+		}
+	}
+
+	logLevel, err := zapcore.ParseLevel(serverConfig.LogLevel)
+	if err != nil {
+		logLevel = zapcore.WarnLevel
+	}
+	vlog.InitLogger(sb.buildLogPath(), vlog.LogFile, logLevel, vlog.JsonFormatType)
+
+	return nil
+}
+
+func (sb *ServiceBase) initCenter(args *servArgs) error {
+
+	cfg, err := sb.parseConfigEnv(args)
+	if err != nil {
+		return err
+	}
+
+	center, err := vconfig.NewCenter(cfg)
+	if err != nil {
+		return err
+	}
+
+	sb.center = center
+	return nil
+}
+
+func (sb *ServiceBase) parseConfigEnv(args *servArgs) (*vconfig.CenterConfig, error) {
+	centerConfig, err := vconfig.ParseConfigEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	port, err := strconv.ParseInt(centerConfig.Port, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vconfig.CenterConfig{
+		AppID:   args.serviceGroup + common.Slash + args.serviceName,
+		Cluster: centerConfig.Cluster,
+		// todo db、mq、redis config
+		Namespace:        []string{vconfig.Application, vconfig.Server},
+		IP:               centerConfig.IP,
+		Port:             int(port),
+		IsBackupConfig:   centerConfig.IsBackupConfig,
+		BackupConfigPath: sb.buildCenterBackupPath(),
+		MustStart:        centerConfig.MustStart,
+	}, nil
+}
+
+func (sb *ServiceBase) buildCenterBackupPath() string {
+	return fmt.Sprintf("%s/%s/%s/%d/%s", common.TmpPath, sb.group, sb.name+sb.lane, sb.version, vconfig.BackupPath)
+}
+
+func (sb *ServiceBase) buildLogPath() string {
+	return fmt.Sprintf("%s/%s/%s/%d/%s", common.TmpPath, sb.group, sb.name+sb.lane, sb.version, vlog.LogPath)
+}
+
+func (sb *ServiceBase) initMetric(ctx context.Context) error {
+	if sb.metricRegister == nil {
+		return nil
+	}
+
+	metric.InitBaseMetric(ctx, sb.group, sb.name, sb.ID)
 	serv, err := sb.powerServices(ctx, map[common.ServiceType]common.Processor{
 		common.Metric: &vcollector.MetricProcessor{},
 	})
-
 	if err != nil {
 		return err
 	}
@@ -139,29 +264,4 @@ func (sb *ServiceBase) powerServices(ctx context.Context, props map[common.Servi
 		Lane:     sb.lane,
 		ServList: serv,
 	}, nil
-}
-
-func (sb *ServiceBase) ServName() string {
-	return sb.name
-}
-
-func (sb *ServiceBase) ServGroup() string {
-	return sb.group
-}
-
-func (sb *ServiceBase) ServInfo() *common.RegisterServiceInfo {
-	f := new(common.RegisterServiceInfo)
-	f = sb.val
-	return f
-}
-
-func (sb *ServiceBase) FullServiceRegisterPath() string {
-	return sb.path + common.Slash + sb.ID
-}
-
-func (sb *ServiceBase) Stop() {
-	ctx := context.Background()
-	sb.register.UnRegister(ctx, sb.FullServiceRegisterPath())
-	sb.metricRegister.UnRegister(ctx, sb.FullServiceRegisterPath())
-	sb.shutDown()
 }

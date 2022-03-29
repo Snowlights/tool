@@ -18,6 +18,7 @@ const (
 	HttpPrefix = "http://"
 
 	DefaultRegisterPath = "/tools"
+	TmpPath             = "/tmp"
 )
 
 const (

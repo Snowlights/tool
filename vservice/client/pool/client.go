@@ -33,6 +33,8 @@ func NewClientPool(conf *ClientPoolConfig, newConn func(string) (common.RpcConn,
 	return &ClientPool{conf: conf, newConn: newConn}
 }
 
+// todo reset pool config
+
 func (c *ClientPool) getPool(serv *common.ServiceInfo) *ConnPool {
 	var cp *ConnPool
 	value, ok := c.clientPool.Load(serv.Addr)
