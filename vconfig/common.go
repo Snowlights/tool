@@ -5,7 +5,6 @@ import (
 	"github.com/apolloconfig/agollo/v4/storage"
 	"os"
 	"strings"
-	"time"
 )
 
 const (
@@ -73,12 +72,12 @@ type ServerConfig struct {
 }
 
 type ClientConfig struct {
-	Idle        int64         `json:"idle" properties:"idle"`
-	IdleTimeout int64         `json:"idle_timeout" properties:"idle_timeout"`
-	MaxActive   time.Duration `json:"max_active" properties:"max_active"`
-	StatTime    int64         `json:"stat_time" properties:"stat_time"`
-	Wait        bool          `json:"wait" properties:"wait"`
-	WaitTimeout int64         `json:"wait_timeout" properties:"wait_timeout"`
+	Idle        int64 `json:"idle" properties:"idle"`
+	IdleTimeout int64 `json:"idle_timeout" properties:"idle_timeout"`
+	MaxActive   int64 `json:"max_active" properties:"max_active"`
+	StatTime    int64 `json:"stat_time" properties:"stat_time"`
+	Wait        bool  `json:"wait" properties:"wait"`
+	WaitTimeout int64 `json:"wait_timeout" properties:"wait_timeout"`
 }
 
 const (

@@ -59,6 +59,22 @@ func NewGrpcClient(client common.Client, servCli func(conn *grpc.ClientConn) int
 	return gc
 }
 
+func (g *GrpcClient) Rpc(args *common.ClientCallerArgs, fnRpc func(interface{}) error) error {
+	if len(args.HashKey) == 0 {
+		args.HashKey = clientCommon.NewHashKey()
+	}
+
+	serv, ok := g.client.GetServAddr(args.Lane, common.Grpc, args.HashKey)
+	if !ok {
+		return fmt.Errorf("%s caller args is %+v", common.NotFoundServInfo, args)
+	}
+	if serv.Type != common.Rpc {
+		return fmt.Errorf("%s serv info is %+v, caller args is %+v", common.NotFoundServEngine, serv, args)
+	}
+
+	return g.do(context.TODO(), serv, fnRpc)
+}
+
 func (g *GrpcClient) updateConfig(cfg *vconfig.ClientConfig) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -81,29 +97,12 @@ func (g *GrpcClient) reload() {
 	if err != nil {
 		return
 	}
-	g.updateConfig(cfg)
-
+	go g.updateConfig(cfg)
+	go g.resetPoolConfig(cfg)
 }
 
 func (g *GrpcClient) resetPoolConfig(cfg *vconfig.ClientConfig) {
-	// todo reset pool config
-
-}
-
-func (g *GrpcClient) Rpc(args *common.ClientCallerArgs, fnRpc func(interface{}) error) error {
-	if len(args.HashKey) == 0 {
-		args.HashKey = clientCommon.NewHashKey()
-	}
-
-	serv, ok := g.client.GetServAddr(args.Lane, common.Grpc, args.HashKey)
-	if !ok {
-		return fmt.Errorf("%s caller args is %+v", common.NotFoundServInfo, args)
-	}
-	if serv.Type != common.Rpc {
-		return fmt.Errorf("%s serv info is %+v, caller args is %+v", common.NotFoundServEngine, serv, args)
-	}
-
-	return g.do(context.TODO(), serv, fnRpc)
+	g.clientPool.ResetConnConfig(cfg)
 }
 
 // todo: might have some problem, like auth, use secret key to fix it

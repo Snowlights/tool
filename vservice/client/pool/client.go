@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 	"time"
+	"vtool/vconfig"
 	"vtool/vservice/common"
 )
 
@@ -12,7 +13,7 @@ const getConnTimeout = time.Second
 type ClientPoolConfig struct {
 	ServiceName string
 
-	Idle, Active int
+	Idle, Active int64
 	IdleTimeout  time.Duration
 
 	Wait        bool
@@ -22,6 +23,7 @@ type ClientPoolConfig struct {
 }
 
 type ClientPool struct {
+	cMu     sync.RWMutex
 	conf    *ClientPoolConfig
 	newConn func(string) (common.RpcConn, error)
 
@@ -34,6 +36,32 @@ func NewClientPool(conf *ClientPoolConfig, newConn func(string) (common.RpcConn,
 }
 
 // todo reset pool config
+func (c *ClientPool) ResetConfig(cfg *vconfig.ClientConfig) {
+	c.cMu.Lock()
+	defer c.cMu.Unlock()
+
+	c.conf.Idle = cfg.Idle
+	c.conf.Active = cfg.MaxActive
+	c.conf.IdleTimeout = time.Duration(cfg.IdleTimeout)
+	c.conf.Wait = cfg.Wait
+	c.conf.WaitTimeOut = time.Duration(cfg.WaitTimeout)
+	c.conf.StatTime = time.Duration(cfg.StatTime)
+}
+
+func (c *ClientPool) ResetConnConfig(cfg *vconfig.ClientConfig) {
+	c.cMu.Lock()
+	defer c.cMu.Unlock()
+
+	c.clientPool.Range(func(key, value interface{}) bool {
+		conn, ok := value.(*ConnPool)
+		if !ok {
+			return false
+		}
+		conn.ResetConfig(cfg)
+		return true
+	})
+
+}
 
 func (c *ClientPool) getPool(serv *common.ServiceInfo) *ConnPool {
 	var cp *ConnPool
