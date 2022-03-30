@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"strconv"
 	"sync"
-	"time"
 	"vtool/parse"
 	"vtool/vconfig"
 	"vtool/vlog"
@@ -28,8 +27,8 @@ type GrpcClient struct {
 
 	center vconfig.Center
 
-	mu           sync.RWMutex
-	clientConfig *vconfig.ClientConfig
+	mu   sync.RWMutex
+	conf *vconfig.ClientConfig
 }
 
 func NewGrpcClient(client common.Client, servCli func(conn *grpc.ClientConn) interface{}) common.RpcClient {
@@ -37,6 +36,15 @@ func NewGrpcClient(client common.Client, servCli func(conn *grpc.ClientConn) int
 	gc := &GrpcClient{
 		client:        client,
 		serviceClient: servCli,
+		conf: &vconfig.ClientConfig{
+			Idle:           pool.DefaultIdle,
+			IdleTimeout:    pool.DefaultIdleTimeout,
+			MaxActive:      pool.DefaultMaxActive,
+			StatTime:       pool.DefaultStatTime,
+			Wait:           true,
+			WaitTimeout:    pool.DefaultWaitTimeout,
+			GetConnTimeout: pool.DefaultGetConnTimeout,
+		},
 	}
 
 	err := gc.initCenter()
@@ -45,15 +53,18 @@ func NewGrpcClient(client common.Client, servCli func(conn *grpc.ClientConn) int
 	}
 
 	gc.center.AddListener(&common.ClientListener{Change: gc.reload})
+	gc.reload()
+	cfg := gc.getConfig()
 
 	gc.clientPool = pool.NewClientPool(&pool.ClientPoolConfig{
-		ServiceName: client.ServName(),
-		Idle:        pool.DefaultIdle,
-		Active:      pool.DefaultMaxActive,
-		IdleTimeout: pool.DefaultIdleTimeout,
-		Wait:        true,
-		WaitTimeOut: time.Second * 3,
-		StatTime:    pool.DefaultStatTime,
+		ServiceName:    client.ServName(),
+		Idle:           cfg.Idle,
+		Active:         cfg.MaxActive,
+		IdleTimeout:    cfg.IdleTimeout,
+		Wait:           cfg.Wait,
+		WaitTimeOut:    cfg.WaitTimeout,
+		StatTime:       cfg.StatTime,
+		GetConnTimeout: cfg.GetConnTimeout,
 	}, gc.newConn)
 	gc.client.AddPoolHandler(gc.deleteAddrHandler)
 	return gc
@@ -79,14 +90,14 @@ func (g *GrpcClient) updateConfig(cfg *vconfig.ClientConfig) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	g.clientConfig = cfg
+	g.conf = cfg
 }
 
 func (g *GrpcClient) getConfig() *vconfig.ClientConfig {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	cfg := g.clientConfig
+	cfg := g.conf
 	return cfg
 }
 
@@ -102,6 +113,9 @@ func (g *GrpcClient) reload() {
 }
 
 func (g *GrpcClient) resetPoolConfig(cfg *vconfig.ClientConfig) {
+	if g.clientPool == nil {
+		return
+	}
 	g.clientPool.ResetConnConfig(cfg)
 }
 

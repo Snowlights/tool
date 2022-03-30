@@ -8,8 +8,6 @@ import (
 	"vtool/vservice/common"
 )
 
-const getConnTimeout = time.Second
-
 type ClientPoolConfig struct {
 	ServiceName string
 
@@ -19,7 +17,8 @@ type ClientPoolConfig struct {
 	Wait        bool
 	WaitTimeOut time.Duration
 
-	StatTime time.Duration
+	StatTime       time.Duration
+	GetConnTimeout time.Duration
 }
 
 type ClientPool struct {
@@ -46,6 +45,7 @@ func (c *ClientPool) ResetConfig(cfg *vconfig.ClientConfig) {
 	c.conf.Wait = cfg.Wait
 	c.conf.WaitTimeOut = time.Duration(cfg.WaitTimeout)
 	c.conf.StatTime = time.Duration(cfg.StatTime)
+	c.conf.GetConnTimeout = cfg.GetConnTimeout
 }
 
 func (c *ClientPool) ResetConnConfig(cfg *vconfig.ClientConfig) {
@@ -61,6 +61,14 @@ func (c *ClientPool) ResetConnConfig(cfg *vconfig.ClientConfig) {
 		return true
 	})
 
+}
+
+func (c *ClientPool) getConfig() *ClientPoolConfig {
+	c.cMu.RLock()
+	defer c.cMu.RUnlock()
+
+	cfg := c.conf
+	return cfg
 }
 
 func (c *ClientPool) getPool(serv *common.ServiceInfo) *ConnPool {
@@ -109,7 +117,14 @@ func (c *ClientPool) Delete(ctx context.Context, addr string) {
 
 func (c *ClientPool) Get(ctx context.Context, serv *common.ServiceInfo) (common.RpcConn, error) {
 	cp := c.getPool(serv)
-	ctx, cancel := context.WithTimeout(ctx, getConnTimeout)
+
+	cfg := c.getConfig()
+	timeout := cfg.GetConnTimeout
+	if timeout == 0 {
+		timeout = DefaultGetConnTimeout
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	return cp.Get(ctx)
 }

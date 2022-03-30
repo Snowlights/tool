@@ -12,10 +12,12 @@ import (
 )
 
 const (
-	DefaultStatTime    = time.Millisecond * 100
-	DefaultIdle        = 128
-	DefaultMaxActive   = 256
-	DefaultIdleTimeout = time.Minute
+	DefaultStatTime       = time.Millisecond * 100
+	DefaultIdle           = 128
+	DefaultMaxActive      = 256
+	DefaultIdleTimeout    = time.Minute
+	DefaultWaitTimeout    = time.Second * 3
+	DefaultGetConnTimeout = time.Second
 )
 
 type ConnPool struct {
@@ -138,6 +140,7 @@ func (cp *ConnPool) stat() {
 
 	ticker := time.NewTicker(cp.getStatTime())
 	for {
+		// note: if use in sdk, log level will be set by server log level
 		vlog.DebugF(context.Background(), fmt.Sprintf("ConnPool.stat, cp.active:%d, cp.idle:%d ", cp.active, cp.connList.Len()))
 		select {
 		case <-ticker.C:
