@@ -7,7 +7,10 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"time"
+	"strconv"
+	"sync"
+	"vtool/parse"
+	"vtool/vconfig"
 	"vtool/vlog"
 	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/client/pool"
@@ -21,6 +24,11 @@ type GrpcClient struct {
 	serviceClient func(conn *grpc.ClientConn) interface{}
 
 	clientPool *pool.ClientPool
+
+	center vconfig.Center
+
+	mu   sync.RWMutex
+	conf *vconfig.ClientConfig
 }
 
 func NewGrpcClient(client common.Client, servCli func(conn *grpc.ClientConn) interface{}) common.RpcClient {
@@ -28,15 +36,35 @@ func NewGrpcClient(client common.Client, servCli func(conn *grpc.ClientConn) int
 	gc := &GrpcClient{
 		client:        client,
 		serviceClient: servCli,
+		conf: &vconfig.ClientConfig{
+			Idle:           pool.DefaultIdle,
+			IdleTimeout:    pool.DefaultIdleTimeout,
+			MaxActive:      pool.DefaultMaxActive,
+			StatTime:       pool.DefaultStatTime,
+			Wait:           true,
+			WaitTimeout:    pool.DefaultWaitTimeout,
+			GetConnTimeout: pool.DefaultGetConnTimeout,
+		},
 	}
+
+	err := gc.initCenter()
+	if err != nil {
+		vlog.ErrorF(context.Background(), "initCenter error: %v", err)
+	}
+
+	gc.center.AddListener(&common.ClientListener{Change: gc.reload})
+	gc.reload()
+	cfg := gc.getConfig()
+
 	gc.clientPool = pool.NewClientPool(&pool.ClientPoolConfig{
-		ServiceName: client.ServName(),
-		Idle:        pool.DefaultIdle,
-		Active:      pool.DefaultMaxActive,
-		IdleTimeout: pool.DefaultIdleTimeout,
-		Wait:        true,
-		WaitTimeOut: time.Second * 3,
-		StatTime:    pool.DefaultStatTime,
+		ServiceName:    client.ServName(),
+		Idle:           cfg.Idle,
+		Active:         cfg.MaxActive,
+		IdleTimeout:    cfg.IdleTimeout,
+		Wait:           cfg.Wait,
+		WaitTimeOut:    cfg.WaitTimeout,
+		StatTime:       cfg.StatTime,
+		GetConnTimeout: cfg.GetConnTimeout,
 	}, gc.newConn)
 	gc.client.AddPoolHandler(gc.deleteAddrHandler)
 	return gc
@@ -56,6 +84,78 @@ func (g *GrpcClient) Rpc(args *common.ClientCallerArgs, fnRpc func(interface{}) 
 	}
 
 	return g.do(context.TODO(), serv, fnRpc)
+}
+
+func (g *GrpcClient) updateConfig(cfg *vconfig.ClientConfig) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	g.conf = cfg
+}
+
+func (g *GrpcClient) getConfig() *vconfig.ClientConfig {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	cfg := g.conf
+	return cfg
+}
+
+func (g *GrpcClient) reload() {
+
+	cfg := new(vconfig.ClientConfig)
+	err := g.center.UnmarshalWithNameSpace(vconfig.Client, parse.PropertiesTagName, cfg)
+	if err != nil {
+		return
+	}
+	go g.updateConfig(cfg)
+	go g.resetPoolConfig(cfg)
+}
+
+func (g *GrpcClient) resetPoolConfig(cfg *vconfig.ClientConfig) {
+	if g.clientPool == nil {
+		return
+	}
+	g.clientPool.ResetConnConfig(cfg)
+}
+
+// todo: might have some problem, like auth, use secret key to fix it
+func (g *GrpcClient) initCenter() error {
+	cfg, err := g.parseConfigEnv()
+	if err != nil {
+		return err
+	}
+
+	center, err := vconfig.NewCenter(cfg)
+	if err != nil {
+		return err
+	}
+
+	g.center = center
+	return nil
+}
+
+func (g *GrpcClient) parseConfigEnv() (*vconfig.CenterConfig, error) {
+	centerConfig, err := vconfig.ParseConfigEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	port, err := strconv.ParseInt(centerConfig.Port, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vconfig.CenterConfig{
+		AppID:            g.client.ServGroup() + common.Slash + g.client.ServName(),
+		Cluster:          centerConfig.Cluster,
+		Namespace:        []string{vconfig.Client},
+		IP:               centerConfig.IP,
+		Port:             int(port),
+		IsBackupConfig:   false,
+		BackupConfigPath: "",
+		MustStart:        centerConfig.MustStart,
+	}, nil
 }
 
 func (g *GrpcClient) do(ctx context.Context, serv *common.ServiceInfo, fnRpc func(interface{}) error) error {

@@ -1,6 +1,9 @@
 package common
 
-import "context"
+import (
+	"context"
+	"vtool/vconfig"
+)
 
 const ServWeight = 100
 
@@ -26,7 +29,7 @@ type ServerBase interface {
 
 	Stop()
 
-	// todo add config to apollo
+	GetCenter(ctx context.Context) vconfig.Center
 
 	// todo service region
 	// eg: beijing、hangzhou、shanghai

@@ -91,7 +91,7 @@ func SayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
 func TestNewGrpcClient(t *testing.T) {
 
 	client, _ := clientCommon.NewClientWithClientConfig(&common.ClientConfig{
-		RegistrationType: common.ZOOKEEPER,
+		RegistrationType: common.ETCD,
 		Cluster:          []string{"127.0.0.1:2379"},
 		ServGroup:        "base/talent",
 		ServName:         "censor",
@@ -102,11 +102,8 @@ func TestNewGrpcClient(t *testing.T) {
 	}
 
 	grpcClient = clientGrpc.NewGrpcClient(client, servCli)
-	for i := 0; i < 5000; i++ {
-		go func() {
-			fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
-		}()
-	}
+
+	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
 
 	time.Sleep(time.Hour)
 }

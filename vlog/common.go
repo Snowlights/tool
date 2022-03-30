@@ -10,6 +10,9 @@ type FormatType int64
 const (
 	JsonFormatType FormatType = 1
 	TextFormatType FormatType = 2
+
+	LogPath = "logs"
+	LogFile = "vlog.log"
 )
 
 const (

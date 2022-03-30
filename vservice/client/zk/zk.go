@@ -77,6 +77,10 @@ func (c *Client) ServName() string {
 	return c.servName
 }
 
+func (c *Client) ServGroup() string {
+	return c.servGroup
+}
+
 func (c *Client) GetAllServAddr() []*common.RegisterServiceInfo {
 	c.servMu.Lock()
 	defer c.servMu.Unlock()

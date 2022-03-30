@@ -25,10 +25,7 @@ type servArgs struct {
 	serviceGroup string
 	serviceLane  string
 
-	logDir       string
-	registerType common.RegistrationType
-
-	cluster []string
+	version int64
 }
 
 func GetServBase() common.ServerBase {
@@ -83,15 +80,15 @@ func (s *Server) awaitSignal() {
 	}
 }
 
-// todo change to environment
 func (s *Server) parseServiceInfo() (*servArgs, error) {
-	var serv, logDir, group, lane string
-	var registerType int64
+	var serv, group, lane string
+	var version int64
+
 	flag.StringVar(&serv, "serv", "censor", "service name")
-	flag.StringVar(&logDir, "logDir", "/tmp", "service log dir")
 	flag.StringVar(&group, "group", "base/talent", "service group")
 	flag.StringVar(&lane, "lane", "", "service lane")
-	flag.Int64Var(&registerType, "regType", 1, "service register type")
+	flag.Int64Var(&version, "version", 1, "service build version")
+
 	flag.Parse()
 
 	if len(serv) == 0 {
@@ -102,20 +99,10 @@ func (s *Server) parseServiceInfo() (*servArgs, error) {
 		return nil, common.ServiceGroupIsNil
 	}
 
-	if registerType == 0 {
-		return nil, common.RegisterTypeIsNil
-	}
-
-	if len(logDir) == 0 {
-		return nil, common.LogDirIsNil
-	}
-
 	return &servArgs{
 		serviceName:  serv,
 		serviceGroup: group,
-		logDir:       logDir,
+		version:      version,
 		serviceLane:  lane,
-		registerType: common.RegistrationType(registerType),
-		cluster:      []string{"127.0.0.1:2379"},
 	}, nil
 }

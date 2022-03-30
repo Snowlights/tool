@@ -4,7 +4,11 @@ import (
 	"context"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"strconv"
+	"sync"
 	"time"
+	"vtool/parse"
+	"vtool/vconfig"
 	"vtool/vlog"
 	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/client/pool"
@@ -17,6 +21,11 @@ type ThriftClient struct {
 	serviceClient func(thrift.TTransport, thrift.TProtocolFactory) interface{}
 
 	clientPool *pool.ClientPool
+
+	center vconfig.Center
+
+	mu           sync.RWMutex
+	clientConfig *vconfig.ClientConfig
 }
 
 func NewThriftClient(client common.Client, servCli func(thrift.TTransport, thrift.TProtocolFactory) interface{}) common.RpcClient {
@@ -25,6 +34,14 @@ func NewThriftClient(client common.Client, servCli func(thrift.TTransport, thrif
 		client:        client,
 		serviceClient: servCli,
 	}
+
+	err := tc.initCenter()
+	if err != nil {
+		vlog.ErrorF(context.Background(), "initCenter error: %v", err)
+	}
+
+	tc.center.AddListener(&common.ClientListener{Change: tc.reload})
+
 	tc.clientPool = pool.NewClientPool(&pool.ClientPoolConfig{
 		ServiceName: client.ServName(),
 		Idle:        pool.DefaultIdle,
@@ -75,6 +92,74 @@ func (t *ThriftClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc 
 	}
 
 	return fnRpc(conn.GetConn())
+}
+
+func (t *ThriftClient) updateConfig(cfg *vconfig.ClientConfig) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	t.clientConfig = cfg
+}
+
+func (t *ThriftClient) getConfig() *vconfig.ClientConfig {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	cfg := t.clientConfig
+	return cfg
+}
+
+func (t *ThriftClient) reload() {
+
+	cfg := new(vconfig.ClientConfig)
+	err := t.center.UnmarshalWithNameSpace(vconfig.Client, parse.PropertiesTagName, cfg)
+	if err != nil {
+		return
+	}
+	go t.updateConfig(cfg)
+	go t.resetPoolConfig(cfg)
+}
+
+func (t *ThriftClient) initCenter() error {
+	cfg, err := t.parseConfigEnv()
+	if err != nil {
+		return err
+	}
+
+	center, err := vconfig.NewCenter(cfg)
+	if err != nil {
+		return err
+	}
+
+	t.center = center
+	return nil
+}
+
+func (t *ThriftClient) parseConfigEnv() (*vconfig.CenterConfig, error) {
+	centerConfig, err := vconfig.ParseConfigEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	port, err := strconv.ParseInt(centerConfig.Port, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vconfig.CenterConfig{
+		AppID:            t.client.ServGroup() + common.Slash + t.client.ServName(),
+		Cluster:          centerConfig.Cluster,
+		Namespace:        []string{vconfig.Client},
+		IP:               centerConfig.IP,
+		Port:             int(port),
+		IsBackupConfig:   false,
+		BackupConfigPath: "",
+		MustStart:        centerConfig.MustStart,
+	}, nil
+}
+
+func (t *ThriftClient) resetPoolConfig(cfg *vconfig.ClientConfig) {
+	t.clientPool.ResetConnConfig(cfg)
 }
 
 func (t *ThriftClient) deleteAddrHandler(addr []string) {

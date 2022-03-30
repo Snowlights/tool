@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/apolloconfig/agollo/v4/storage"
 	"net/http"
 	"time"
 )
@@ -24,6 +25,7 @@ type Client interface {
 	GetServAddr(lane string, serviceType ServiceType, hashKey string) (*ServiceInfo, bool)
 	AddPoolHandler(func([]string))
 	ServName() string
+	ServGroup() string
 }
 
 type RpcClient interface {
@@ -53,4 +55,16 @@ type ClientConfig struct {
 
 	ServGroup string
 	ServName  string
+}
+
+type ClientListener struct {
+	Change func()
+}
+
+func (cl *ClientListener) OnChange(event *storage.ChangeEvent) {
+
+}
+
+func (cl *ClientListener) OnNewestChange(event *storage.FullChangeEvent) {
+	cl.Change()
 }
