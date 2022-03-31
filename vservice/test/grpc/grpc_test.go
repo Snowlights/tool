@@ -102,8 +102,9 @@ func TestNewGrpcClient(t *testing.T) {
 	}
 
 	grpcClient = clientGrpc.NewGrpcClient(client, servCli)
-
-	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
+	for i := 0; i < 1000; i++ {
+		go SayHello(context.Background(), &SayHelloReq{})
+	}
 
 	time.Sleep(time.Hour)
 }

@@ -3,7 +3,6 @@ package zk
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/samuel/go-zookeeper/zk"
 	"strconv"
 	"strings"
@@ -129,7 +128,6 @@ func (c *Client) GetServAddr(lane string, serviceType common.ServiceType, hashKe
 		return nil, false
 	}
 
-	fmt.Println(key)
 	servPathPartIndex := strings.LastIndex(key, common.HashKey)
 	servPath := key[:servPathPartIndex]
 

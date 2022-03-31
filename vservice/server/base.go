@@ -16,6 +16,7 @@ import (
 	"vtool/vservice/server/engine"
 	"vtool/vservice/server/register"
 	"vtool/vservice/server/register/consul"
+	"vtool/vtrace"
 )
 
 type ServiceBase struct {
@@ -72,6 +73,8 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	vtrace.InitJaegerTracer(servBase.ServName())
 
 	return servBase, nil
 }

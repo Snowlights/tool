@@ -64,7 +64,6 @@ func SpanDecorator(ctx context.Context,
 				span.SetTag("engineType", serv.Type)
 			}
 		}
-
 	}
 
 }

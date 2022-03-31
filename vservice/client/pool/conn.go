@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	DefaultStatTime       = time.Millisecond * 100
+	DefaultStatTime       = 100
 	DefaultIdle           = 128
 	DefaultMaxActive      = 256
-	DefaultIdleTimeout    = time.Minute
-	DefaultWaitTimeout    = time.Second * 3
-	DefaultGetConnTimeout = time.Second
+	DefaultIdleTimeout    = 60000
+	DefaultWaitTimeout    = 3000
+	DefaultGetConnTimeout = 1000
 )
 
 type ConnPool struct {
@@ -105,7 +105,7 @@ func NewConnPool(conf *ConnPoolConfig, newConn func(string) (common.RpcConn, err
 	if conf.maxActive == 0 {
 		conf.idle = DefaultMaxActive
 	}
-	if conf.maxActive > conf.idle {
+	if conf.maxActive < conf.idle {
 		conf.maxActive = DefaultMaxActive
 		conf.idle = DefaultIdle
 	}
@@ -127,10 +127,10 @@ func (cp *ConnPool) ResetConfig(cfg *vconfig.ClientConfig) {
 
 	cp.conf.idle = cfg.Idle
 	cp.conf.maxActive = cfg.MaxActive
-	cp.conf.idleTimeout = time.Duration(cfg.IdleTimeout)
+	cp.conf.idleTimeout = time.Duration(cfg.IdleTimeout) * time.Millisecond
 	cp.conf.wait = cfg.Wait
-	cp.conf.waitTimeOut = time.Duration(cfg.WaitTimeout)
-	cp.conf.statTime = time.Duration(cfg.StatTime)
+	cp.conf.waitTimeOut = time.Duration(cfg.WaitTimeout) * time.Millisecond
+	cp.conf.statTime = time.Duration(cfg.StatTime) * time.Millisecond
 }
 
 func (cp *ConnPool) stat() {
@@ -187,7 +187,6 @@ func (cp *ConnPool) Get(ctx context.Context) (common.RpcConn, error) {
 		cp.mu.Unlock()
 		return nil, nil
 	}
-	fmt.Println("Get", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
 	for {
 		for index, length := 0, cp.connList.Len(); index < length; index++ {
 			e := cp.connList.Front()
@@ -245,7 +244,6 @@ func (cp *ConnPool) Get(ctx context.Context) (common.RpcConn, error) {
 
 func (cp *ConnPool) Put(ctx context.Context, rpcConn common.RpcConn) error {
 	cp.mu.Lock()
-	fmt.Println("Put", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
 
 	if cp.closed {
 		cp.mu.Unlock()
@@ -265,10 +263,10 @@ func (cp *ConnPool) Put(ctx context.Context, rpcConn common.RpcConn) error {
 	})
 	if int64(cp.connList.Len()) > cp.getIdle() {
 		rpcConn = cp.connList.Remove(cp.connList.Back()).(connItem).conn
+		cp.active--
 	} else {
 		rpcConn = nil
 	}
-	cp.active--
 	cp.mu.Unlock()
 
 	if rpcConn == nil {

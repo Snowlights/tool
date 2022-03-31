@@ -20,6 +20,8 @@ require (
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/viper v1.10.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
+	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.2
 	go.uber.org/atomic v1.7.0

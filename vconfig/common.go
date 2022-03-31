@@ -5,7 +5,6 @@ import (
 	"github.com/apolloconfig/agollo/v4/storage"
 	"os"
 	"strings"
-	"time"
 )
 
 const (
@@ -16,8 +15,13 @@ const (
 	// client config
 	Client = "client"
 
-	BackupPath = "backupPath"
+	// middleware config
+	MiddlewareAppID          = "middleware"
+	MiddlewareNamespaceTrace = "middleware.trace"
+	MiddlewareNamespaceMQ    = "middleware.mq"
+	MiddlewareNamespaceDB    = "middleware.db"
 
+	BackupPath = "backupPath"
 	httpScheme = "http://"
 
 	dot   = "."
@@ -73,14 +77,14 @@ type ServerConfig struct {
 }
 
 type ClientConfig struct {
-	Idle        int64         `json:"idle" properties:"idle"`
-	IdleTimeout time.Duration `json:"idle_timeout" properties:"idle_timeout"`
-	MaxActive   int64         `json:"max_active" properties:"max_active"`
-	StatTime    time.Duration `json:"stat_time" properties:"stat_time"`
-	Wait        bool          `json:"wait" properties:"wait"`
-	WaitTimeout time.Duration `json:"wait_timeout" properties:"wait_timeout"`
+	Idle        int64 `json:"idle" properties:"idle"`
+	IdleTimeout int64 `json:"idle_timeout" properties:"idle_timeout"`
+	MaxActive   int64 `json:"max_active" properties:"max_active"`
+	StatTime    int64 `json:"stat_time" properties:"stat_time"`
+	Wait        bool  `json:"wait" properties:"wait"`
+	WaitTimeout int64 `json:"wait_timeout" properties:"wait_timeout"`
 
-	GetConnTimeout time.Duration `json:"get_conn_timeout" properties:"get_conn_timeout"`
+	GetConnTimeout int64 `json:"get_conn_timeout" properties:"get_conn_timeout"`
 }
 
 const (
@@ -100,16 +104,16 @@ type CenterConfigEnv struct {
 }
 
 func ParseConfigEnv() (*CenterConfigEnv, error) {
-	apolloCluster := os.Getenv(APOLLO_CLUSTER)
-	if apolloCluster == "" {
+	apolloCluster, ok := os.LookupEnv(APOLLO_CLUSTER)
+	if !ok {
 		return nil, InvalidCluster
 	}
-	apolloIP := os.Getenv(APOLLO_IP)
-	if apolloIP == "" {
+	apolloIP, ok := os.LookupEnv(APOLLO_IP)
+	if !ok {
 		return nil, InvalidIp
 	}
-	apolloPort := os.Getenv(APOLLO_PORT)
-	if apolloPort == "" {
+	apolloPort, ok := os.LookupEnv(APOLLO_PORT)
+	if !ok {
 		return nil, InvalidPort
 	}
 

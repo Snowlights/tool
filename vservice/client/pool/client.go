@@ -41,11 +41,11 @@ func (c *ClientPool) ResetConfig(cfg *vconfig.ClientConfig) {
 
 	c.conf.Idle = cfg.Idle
 	c.conf.Active = cfg.MaxActive
-	c.conf.IdleTimeout = time.Duration(cfg.IdleTimeout)
+	c.conf.IdleTimeout = time.Duration(cfg.IdleTimeout) * time.Millisecond
 	c.conf.Wait = cfg.Wait
-	c.conf.WaitTimeOut = time.Duration(cfg.WaitTimeout)
-	c.conf.StatTime = time.Duration(cfg.StatTime)
-	c.conf.GetConnTimeout = cfg.GetConnTimeout
+	c.conf.WaitTimeOut = time.Duration(cfg.WaitTimeout) * time.Millisecond
+	c.conf.StatTime = time.Duration(cfg.StatTime) * time.Millisecond
+	c.conf.GetConnTimeout = time.Duration(cfg.GetConnTimeout) * time.Millisecond
 }
 
 func (c *ClientPool) ResetConnConfig(cfg *vconfig.ClientConfig) {
