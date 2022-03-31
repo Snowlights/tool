@@ -17,9 +17,9 @@ const (
 
 	// middleware config
 	MiddlewareAppID          = "middleware"
-	MiddlewareNamespaceTrace = "middleware.trace"
-	MiddlewareNamespaceMQ    = "middleware.mq"
-	MiddlewareNamespaceDB    = "middleware.db"
+	MiddlewareNamespaceTrace = "trace"
+	MiddlewareNamespaceMQ    = "mq"
+	MiddlewareNamespaceDB    = "db"
 
 	BackupPath = "backupPath"
 	httpScheme = "http://"

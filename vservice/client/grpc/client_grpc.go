@@ -178,6 +178,8 @@ func (g *GrpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc fu
 	}
 	defer g.clientPool.Put(ctx, serv, conn)
 
+	// todo add trace info
+
 	return fnRpc(conn.GetConn())
 }
 

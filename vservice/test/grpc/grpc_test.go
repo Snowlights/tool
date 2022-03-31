@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"google.golang.org/grpc"
 	"testing"
 	"time"
@@ -101,10 +102,8 @@ func TestNewGrpcClient(t *testing.T) {
 		return NewTestServiceClient(conn)
 	}
 
+	span := opentracing.GlobalTracer().StartSpan("TestNewGrpcClient")
 	grpcClient = clientGrpc.NewGrpcClient(client, servCli)
-	for i := 0; i < 1000; i++ {
-		go SayHello(context.Background(), &SayHelloReq{})
-	}
-
-	time.Sleep(time.Hour)
+	SayHello(context.Background(), &SayHelloReq{})
+	span.Finish()
 }
