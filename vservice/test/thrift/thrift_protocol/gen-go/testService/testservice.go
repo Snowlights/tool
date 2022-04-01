@@ -213,7 +213,7 @@ func (p *testServiceProcessorSayHello) Process(seqId int32, iprot, oprot thrift.
 // HELPER FUNCTIONS AND STRUCTURES
 
 type SayHelloArgs struct {
-	Req *SayHelloReq `thrift:"req,1" json:"req"`
+	Req *SayHelloReq `rpc_client:"req,1" json:"req"`
 }
 
 func NewSayHelloArgs() *SayHelloArgs {
@@ -309,7 +309,7 @@ func (p *SayHelloArgs) String() string {
 }
 
 type SayHelloResult struct {
-	Success *SayHelloRes `thrift:"success,0" json:"success"`
+	Success *SayHelloRes `rpc_client:"success,0" json:"success"`
 }
 
 func NewSayHelloResult() *SayHelloResult {

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"github.com/apolloconfig/agollo/v4/storage"
 	"net/http"
 	"time"
@@ -29,7 +30,7 @@ type Client interface {
 }
 
 type RpcClient interface {
-	Rpc(*ClientCallerArgs, func(interface{}) error) error
+	Rpc(context.Context, *ClientCallerArgs, func(interface{}) error) error
 }
 
 type RpcConn interface {

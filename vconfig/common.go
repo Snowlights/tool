@@ -5,6 +5,7 @@ import (
 	"github.com/apolloconfig/agollo/v4/storage"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -84,7 +85,43 @@ type ClientConfig struct {
 	Wait        bool  `json:"wait" properties:"wait"`
 	WaitTimeout int64 `json:"wait_timeout" properties:"wait_timeout"`
 
+	RetryTime   int64 `json:"retry_time" properties:"retry_time"`
+	CallTimeout int64 `json:"call_timeout" properties:"call_timeout"`
+
 	GetConnTimeout int64 `json:"get_conn_timeout" properties:"get_conn_timeout"`
+}
+
+const (
+	defaultStatTime    = 100
+	DefaultStatTimeout = 100 * time.Millisecond
+
+	DefaultIdleNum     = 128
+	defaultIdleTime    = 60000
+	DefaultIdleTimeout = time.Minute
+
+	DefaultMaxActive = 256
+
+	defaultWaitTime    = 1000
+	DefaultWaitTimeout = time.Second * 3
+
+	defaultGetConnTime    = 1000
+	DefaultGetConnTimeout = time.Second
+
+	CallRetryTimes     = 3
+	defaultCallTime    = 10000
+	DefaultCallTimeout = time.Second * 10
+)
+
+var DefaultClientConfig = &ClientConfig{
+	Idle:           DefaultIdleNum,
+	IdleTimeout:    defaultIdleTime,
+	MaxActive:      DefaultMaxActive,
+	StatTime:       defaultStatTime,
+	Wait:           true,
+	WaitTimeout:    defaultWaitTime,
+	RetryTime:      CallRetryTimes,
+	CallTimeout:    defaultCallTime,
+	GetConnTimeout: defaultGetConnTime,
 }
 
 const (

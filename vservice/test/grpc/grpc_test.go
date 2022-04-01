@@ -9,7 +9,7 @@ import (
 	"time"
 	"vtool/idl/grpc/grpcError"
 	clientCommon "vtool/vservice/client/common"
-	clientGrpc "vtool/vservice/client/grpc"
+	"vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/grpc/grpc_protocol"
@@ -57,7 +57,7 @@ func TestGrpcServer2(t *testing.T) {
 var grpcClient common.RpcClient
 
 func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(TestServiceClient) error) error {
-	return grpcClient.Rpc(&common.ClientCallerArgs{
+	return grpcClient.Rpc(ctx, &common.ClientCallerArgs{
 		Lane:    "",
 		HashKey: hashKey,
 		TimeOut: timeout,
@@ -103,7 +103,9 @@ func TestNewGrpcClient(t *testing.T) {
 	}
 
 	span := opentracing.GlobalTracer().StartSpan("TestNewGrpcClient")
-	grpcClient = clientGrpc.NewGrpcClient(client, servCli)
-	SayHello(context.Background(), &SayHelloReq{})
+	grpcClient = rpc_client.NewRpcClient(client, nil, servCli)
+	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
 	span.Finish()
+
+	time.Sleep(time.Hour)
 }

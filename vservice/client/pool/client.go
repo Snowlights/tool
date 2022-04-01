@@ -121,7 +121,7 @@ func (c *ClientPool) Get(ctx context.Context, serv *common.ServiceInfo) (common.
 	cfg := c.getConfig()
 	timeout := cfg.GetConnTimeout
 	if timeout == 0 {
-		timeout = DefaultGetConnTimeout
+		timeout = vconfig.DefaultGetConnTimeout
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)

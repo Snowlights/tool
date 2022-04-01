@@ -19,7 +19,7 @@ var _ = thriftError.GoUnusedProtection__
 var GoUnusedProtection__ int
 
 type SayHelloReq struct {
-	Val int64 `thrift:"val,1" json:"val"`
+	Val int64 `rpc_client:"val,1" json:"val"`
 }
 
 func NewSayHelloReq() *SayHelloReq {
@@ -107,7 +107,7 @@ func (p *SayHelloReq) String() string {
 }
 
 type SayHelloData struct {
-	Val string `thrift:"val,1" json:"val"`
+	Val string `rpc_client:"val,1" json:"val"`
 }
 
 func NewSayHelloData() *SayHelloData {
@@ -195,8 +195,8 @@ func (p *SayHelloData) String() string {
 }
 
 type SayHelloRes struct {
-	Data    *SayHelloData        `thrift:"data,1" json:"data"`
-	ErrInfo *thriftError.ErrInfo `thrift:"errInfo,2" json:"errInfo"`
+	Data    *SayHelloData        `rpc_client:"data,1" json:"data"`
+	ErrInfo *thriftError.ErrInfo `rpc_client:"errInfo,2" json:"errInfo"`
 }
 
 func NewSayHelloRes() *SayHelloRes {

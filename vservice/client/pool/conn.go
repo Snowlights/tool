@@ -11,15 +11,6 @@ import (
 	"vtool/vservice/common"
 )
 
-const (
-	DefaultStatTime       = 100
-	DefaultIdle           = 128
-	DefaultMaxActive      = 256
-	DefaultIdleTimeout    = 60000
-	DefaultWaitTimeout    = 3000
-	DefaultGetConnTimeout = 1000
-)
-
 type ConnPool struct {
 	newConn func(string) (common.RpcConn, error)
 
@@ -97,17 +88,24 @@ func (ci *connItem) expire(timeout time.Duration) bool {
 func NewConnPool(conf *ConnPoolConfig, newConn func(string) (common.RpcConn, error)) *ConnPool {
 
 	if conf.statTime == 0 {
-		conf.statTime = DefaultStatTime
+		conf.statTime = vconfig.DefaultStatTimeout
 	}
 	if conf.idle == 0 {
-		conf.idle = DefaultIdle
+		conf.idle = vconfig.DefaultIdleNum
 	}
 	if conf.maxActive == 0 {
-		conf.idle = DefaultMaxActive
+		conf.idle = vconfig.DefaultMaxActive
 	}
 	if conf.maxActive < conf.idle {
-		conf.maxActive = DefaultMaxActive
-		conf.idle = DefaultIdle
+		conf.maxActive = vconfig.DefaultMaxActive
+		conf.idle = vconfig.DefaultIdleNum
+	}
+	if conf.idleTimeout == 0 {
+		conf.idleTimeout = vconfig.DefaultIdleTimeout
+	}
+
+	if conf.waitTimeOut == 0 {
+		conf.waitTimeOut = vconfig.DefaultWaitTimeout
 	}
 
 	c := &ConnPool{

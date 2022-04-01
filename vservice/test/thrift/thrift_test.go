@@ -8,7 +8,7 @@ import (
 	"time"
 	"vtool/idl/thrift/gen-go/thriftError"
 	clientCommon "vtool/vservice/client/common"
-	clientThrift "vtool/vservice/client/thrift"
+	clientThrift "vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/thrift/thrift_protocol/gen-go/testService"
@@ -44,7 +44,7 @@ func TestThriftServer(t *testing.T) {
 var thriftClient common.RpcClient
 
 func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(*TestServiceClient) error) error {
-	return thriftClient.Rpc(&common.ClientCallerArgs{
+	return thriftClient.Rpc(ctx, &common.ClientCallerArgs{
 		Lane:    "",
 		HashKey: hashKey,
 		TimeOut: timeout,
@@ -53,7 +53,7 @@ func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(*Te
 		if ok {
 			return fn(ct)
 		} else {
-			return fmt.Errorf("reflect client thrift error")
+			return fmt.Errorf("reflect client rpc_client error")
 		}
 	})
 }
@@ -89,7 +89,7 @@ func TestNewThriftClient(t *testing.T) {
 		return NewTestServiceClientFactory(t, tp)
 	}
 
-	thriftClient = clientThrift.NewThriftClient(client, servCli)
+	thriftClient = clientThrift.NewRpcClient(client, servCli, nil)
 
 	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
 }

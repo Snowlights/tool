@@ -22,7 +22,7 @@ func (c *ThriftPower) Power(ctx context.Context, addr string) (string, error) {
 	// this should be init before power
 	transportFactory := thrift.NewTFramedTransportFactory(thrift.NewTTransportFactory())
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
-	// protocolFactory := thrift.NewTCompactProtocolFactory()
+	// protocolFactory := rpc_client.NewTCompactProtocolFactory()
 
 	serverTransport, err := thrift.NewTServerSocket(listenAddr)
 	if err != nil {
