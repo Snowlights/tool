@@ -74,7 +74,7 @@ func NewRpcClient(client common.Client, thriftServCli func(thrift.TTransport, th
 	return rpcCli
 }
 
-func (c *RpcClient) Rpc(ctx context.Context, args *common.ClientCallerArgs, fnRpc func(interface{}) error) error {
+func (c *RpcClient) Rpc(ctx context.Context, args *common.ClientCallerArgs, fnRpc func(context.Context, interface{}) error) error {
 
 	if len(args.HashKey) == 0 {
 		args.HashKey = clientCommon.NewHashKey()
@@ -101,7 +101,7 @@ func (c *RpcClient) Rpc(ctx context.Context, args *common.ClientCallerArgs, fnRp
 	return c.do(tCtx, serv, fnRpc)
 }
 
-func (c *RpcClient) do(ctx context.Context, serv *common.ServiceInfo, fnRpc func(interface{}) error) error {
+func (c *RpcClient) do(ctx context.Context, serv *common.ServiceInfo, fnRpc func(context.Context, interface{}) error) error {
 	var err error
 	retry := c.getConfig().RetryTime
 	if retry == 0 {
@@ -116,15 +116,15 @@ func (c *RpcClient) do(ctx context.Context, serv *common.ServiceInfo, fnRpc func
 	return err
 }
 
-func (c *RpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc func(interface{}) error) error {
+func (c *RpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc func(context.Context, interface{}) error) error {
 	conn, err := c.clientPool.Get(ctx, serv)
 	if err != nil {
 		return err
 	}
 	defer c.clientPool.Put(ctx, serv, conn)
 
-	// todo: add trace
-	return fnRpc(conn.GetConn())
+	// todo: add trace info about tags and process
+	return fnRpc(ctx, conn.GetConn())
 }
 
 func (c *RpcClient) updateConfig(cfg *vconfig.ClientConfig) {

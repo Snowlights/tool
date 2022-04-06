@@ -4,23 +4,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/opentracing/opentracing-go"
-	"google.golang.org/grpc"
 	"testing"
 	"time"
-	"vtool/idl/grpc/grpcError"
-	clientCommon "vtool/vservice/client/common"
-	"vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/grpc/grpc_protocol"
 )
 
-type helloServiceHandler struct {
-}
+type helloServiceHandler struct{}
 
 func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*SayHelloRes, error) {
+
 	return &SayHelloRes{
-		Data: &SayHelloData{Val: "this is val"},
+		Data: &SayHelloData{Val: "this is grpc val"},
 	}, nil
 }
 
@@ -54,56 +50,9 @@ func TestGrpcServer2(t *testing.T) {
 	}
 }
 
-var grpcClient common.RpcClient
-
-func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(TestServiceClient) error) error {
-	return grpcClient.Rpc(ctx, &common.ClientCallerArgs{
-		Lane:    "",
-		HashKey: hashKey,
-		TimeOut: timeout,
-	}, func(c interface{}) error {
-		ct, ok := c.(TestServiceClient)
-		if ok {
-			return fn(ct)
-		} else {
-			return fmt.Errorf("reflect client grpc error")
-		}
-	})
-}
-
-func SayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
-	err := rpc(ctx, "", time.Millisecond*3000,
-		func(c TestServiceClient) (e error) {
-			res, e = c.SayHello(ctx, req)
-			return e
-		})
-
-	if err != nil {
-		res = &SayHelloRes{
-			ErrInfo: &grpcError.ErrInfo{
-				Code: -1,
-				Msg:  fmt.Sprintf("rpc service:%s serv:%s method:SayHello err:%v", "censor", common.Grpc, err),
-			},
-		}
-	}
-	return
-}
-
 func TestNewGrpcClient(t *testing.T) {
 
-	client, _ := clientCommon.NewClientWithClientConfig(&common.ClientConfig{
-		RegistrationType: common.ETCD,
-		Cluster:          []string{"127.0.0.1:2379"},
-		ServGroup:        "base/talent",
-		ServName:         "censor",
-	})
-
-	servCli := func(conn *grpc.ClientConn) interface{} {
-		return NewTestServiceClient(conn)
-	}
-
 	span := opentracing.GlobalTracer().StartSpan("TestNewGrpcClient")
-	grpcClient = rpc_client.NewRpcClient(client, nil, servCli)
 	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
 	span.Finish()
 

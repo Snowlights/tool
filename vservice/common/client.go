@@ -30,7 +30,7 @@ type Client interface {
 }
 
 type RpcClient interface {
-	Rpc(context.Context, *ClientCallerArgs, func(interface{}) error) error
+	Rpc(context.Context, *ClientCallerArgs, func(context.Context, interface{}) error) error
 }
 
 type RpcConn interface {
