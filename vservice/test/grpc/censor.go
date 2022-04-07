@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"time"
-	"vtool/idl/grpc/grpcError"
+	"vtool/idl/grpc/grpcBase"
 	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
@@ -17,7 +17,7 @@ func init() {
 		RegistrationType: common.ETCD,
 		Cluster:          []string{"127.0.0.1:2379"},
 		ServGroup:        "base/talent",
-		ServName:         "censor",
+		ServName:         "talent",
 	})
 
 	servCli := func(conn *grpc.ClientConn) interface{} {
@@ -44,7 +44,7 @@ func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(Tes
 }
 
 func SayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
-	err := rpc(ctx, "", time.Millisecond*3000,
+	err := rpc(ctx, "", time.Hour,
 		func(c TestServiceClient) (e error) {
 			res, e = c.SayHello(ctx, req)
 			return e
@@ -52,7 +52,7 @@ func SayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
 
 	if err != nil {
 		res = &SayHelloRes{
-			ErrInfo: &grpcError.ErrInfo{
+			ErrInfo: &grpcBase.ErrInfo{
 				Code: -1,
 				Msg:  fmt.Sprintf("rpc service:%s serv:%s method:SayHello err:%v", "censor", common.Grpc, err),
 			},

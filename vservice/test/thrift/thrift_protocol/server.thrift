@@ -18,5 +18,5 @@ struct SayHelloRes {
 }
 
 service TestService {
-    SayHelloRes SayHello(1:SayHelloReq req)
+    SayHelloRes SayHello(1:SayHelloReq req, 2:thrift.Context ctx)
 }

@@ -124,8 +124,35 @@ func (c *RpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc fun
 	}
 	defer c.clientPool.Put(ctx, serv, conn)
 
+	ctx = c.injectServ(ctx)
 	vtrace.SpanFromContent(ctx)
+
 	return fnRpc(ctx, conn.GetConn())
+}
+
+func (c *RpcClient) injectServ(ctx context.Context) context.Context {
+	servBase := server.GetServBase()
+	if servBase != nil {
+		servInfo := servBase.ServInfo()
+		if servInfo != nil {
+			injectServInfoMap := make(map[string]string)
+			injectServInfoMap["lane"] = servInfo.Lane
+			serv, ok := servInfo.ServList[common.Grpc]
+			if ok {
+				injectServInfoMap["servType"] = string(common.Grpc)
+				injectServInfoMap["servIp"] = serv.Addr
+				injectServInfoMap["engineType"] = string(serv.Type)
+			}
+			serv, ok = servInfo.ServList[common.Thrift]
+			if ok {
+				injectServInfoMap["servType"] = string(common.Thrift)
+				injectServInfoMap["servIp"] = serv.Addr
+				injectServInfoMap["engineType"] = string(serv.Type)
+			}
+			ctx = context.WithValue(ctx, clientCommon.InjectServKey, injectServInfoMap)
+		}
+	}
+	return ctx
 }
 
 func (c *RpcClient) updateConfig(cfg *vconfig.ClientConfig) {

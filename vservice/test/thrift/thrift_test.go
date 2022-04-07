@@ -3,21 +3,31 @@ package thrift
 import (
 	"context"
 	"fmt"
-	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/opentracing/opentracing-go"
 	"testing"
-	clientCommon "vtool/vservice/client/common"
-	clientThrift "vtool/vservice/client/rpc_client"
+	"vtool/idl/thrift/gen-go/thriftBase"
+	common2 "vtool/vservice/client/common"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
+	"vtool/vservice/test/grpc"
+	testService "vtool/vservice/test/grpc/grpc_protocol"
 	. "vtool/vservice/test/thrift/thrift_protocol/gen-go/testService"
 )
 
 type helloServiceHandler struct {
 }
 
-func (h *helloServiceHandler) SayHello(req *SayHelloReq) (*SayHelloRes, error) {
+func (h *helloServiceHandler) SayHello(req *SayHelloReq, tctx *thriftBase.Context) (*SayHelloRes, error) {
+	ctx := common2.NewContextFromThriftBaseContext("helloServiceHandler.SayHello", tctx)
+	span := opentracing.SpanFromContext(ctx)
+	if span != nil {
+		defer span.Finish()
+	}
+
+	res := grpc.SayHello(ctx, &testService.SayHelloReq{HelloType: 1})
+
 	return &SayHelloRes{
-		Data: &SayHelloData{Val: "this is thrift val"},
+		Data: &SayHelloData{Val: "this is thrift val" + fmt.Sprintf("%+v", res)},
 	}, nil
 }
 
@@ -40,19 +50,5 @@ func TestThriftServer(t *testing.T) {
 }
 
 func TestNewThriftClient(t *testing.T) {
-
-	client, _ := clientCommon.NewClientWithClientConfig(&common.ClientConfig{
-		RegistrationType: common.ETCD,
-		Cluster:          []string{"127.0.0.1:2379"},
-		ServGroup:        "base/talent",
-		ServName:         "censor",
-	})
-
-	servCli := func(t thrift.TTransport, tp thrift.TProtocolFactory) interface{} {
-		return NewTestServiceClientFactory(t, tp)
-	}
-
-	thriftClient = clientThrift.NewRpcClient(client, servCli, nil)
-
 	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
 }

@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"vtool/idl/thrift/gen-go/thriftError"
+	"vtool/idl/thrift/gen-go/thriftBase"
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -15,11 +15,11 @@ var _ = thrift.ZERO
 var _ = fmt.Printf
 var _ = bytes.Equal
 
-var _ = thriftError.GoUnusedProtection__
+var _ = thriftBase.GoUnusedProtection__
 var GoUnusedProtection__ int
 
 type SayHelloReq struct {
-	Val int64 `rpc_client:"val,1" json:"val"`
+	Val int64 `thrift:"val,1" json:"val"`
 }
 
 func NewSayHelloReq() *SayHelloReq {
@@ -107,7 +107,7 @@ func (p *SayHelloReq) String() string {
 }
 
 type SayHelloData struct {
-	Val string `rpc_client:"val,1" json:"val"`
+	Val string `thrift:"val,1" json:"val"`
 }
 
 func NewSayHelloData() *SayHelloData {
@@ -195,8 +195,8 @@ func (p *SayHelloData) String() string {
 }
 
 type SayHelloRes struct {
-	Data    *SayHelloData        `rpc_client:"data,1" json:"data"`
-	ErrInfo *thriftError.ErrInfo `rpc_client:"errInfo,2" json:"errInfo"`
+	Data    *SayHelloData       `thrift:"data,1" json:"data"`
+	ErrInfo *thriftBase.ErrInfo `thrift:"errInfo,2" json:"errInfo"`
 }
 
 func NewSayHelloRes() *SayHelloRes {
@@ -212,9 +212,9 @@ func (p *SayHelloRes) GetData() *SayHelloData {
 	return p.Data
 }
 
-var SayHelloRes_ErrInfo_DEFAULT *thriftError.ErrInfo
+var SayHelloRes_ErrInfo_DEFAULT *thriftBase.ErrInfo
 
-func (p *SayHelloRes) GetErrInfo() *thriftError.ErrInfo {
+func (p *SayHelloRes) GetErrInfo() *thriftBase.ErrInfo {
 	if !p.IsSetErrInfo() {
 		return SayHelloRes_ErrInfo_DEFAULT
 	}
@@ -273,7 +273,7 @@ func (p *SayHelloRes) ReadField1(iprot thrift.TProtocol) error {
 }
 
 func (p *SayHelloRes) ReadField2(iprot thrift.TProtocol) error {
-	p.ErrInfo = &thriftError.ErrInfo{}
+	p.ErrInfo = &thriftBase.ErrInfo{}
 	if err := p.ErrInfo.Read(iprot); err != nil {
 		return fmt.Errorf("%T error reading struct: %s", p.ErrInfo, err)
 	}

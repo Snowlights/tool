@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"time"
-	"vtool/idl/grpc/grpcError"
+	"vtool/idl/grpc/grpcBase"
 	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
@@ -52,7 +52,7 @@ func TalentSayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
 
 	if err != nil {
 		res = &SayHelloRes{
-			ErrInfo: &grpcError.ErrInfo{
+			ErrInfo: &grpcBase.ErrInfo{
 				Code: -1,
 				Msg:  fmt.Sprintf("rpc service:%s serv:%s method:SayHello err:%v", "censor", common.Grpc, err),
 			},

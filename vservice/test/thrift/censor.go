@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"time"
-	"vtool/idl/thrift/gen-go/thriftError"
+	"vtool/idl/thrift/gen-go/thriftBase"
 	clientCommon "vtool/vservice/client/common"
 	clientThrift "vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
@@ -29,7 +29,7 @@ func init() {
 
 var thriftClient common.RpcClient
 
-func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(*TestServiceClient) error) error {
+func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(ctx context.Context, c *TestServiceClient) error) error {
 	return thriftClient.Rpc(ctx, &common.ClientCallerArgs{
 		Lane:    "",
 		HashKey: hashKey,
@@ -37,7 +37,7 @@ func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(*Te
 	}, func(ctx context.Context, c interface{}) error {
 		ct, ok := c.(*TestServiceClient)
 		if ok {
-			return fn(ct)
+			return fn(ctx, ct)
 		} else {
 			return fmt.Errorf("reflect client rpc_client error")
 		}
@@ -45,15 +45,16 @@ func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(*Te
 }
 
 func SayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
-	err := rpc(ctx, "", time.Millisecond*3000,
-		func(c *TestServiceClient) (e error) {
-			res, e = c.SayHello(req)
+	err := rpc(ctx, "", time.Hour,
+		func(ctx context.Context, c *TestServiceClient) (e error) {
+			tCtx := clientCommon.NewThriftBaseContextFromContext(ctx)
+			res, e = c.SayHello(req, tCtx)
 			return e
 		})
 
 	if err != nil {
 		res = &SayHelloRes{
-			ErrInfo: &thriftError.ErrInfo{
+			ErrInfo: &thriftBase.ErrInfo{
 				Code: -1,
 				Msg:  fmt.Sprintf("rpc service:%s serv:%s method:SayHello err:%v", "censor", common.Thrift, err),
 			},

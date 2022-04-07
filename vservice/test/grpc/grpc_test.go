@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"github.com/opentracing/opentracing-go"
 	"testing"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
@@ -19,6 +18,8 @@ func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*
 	//return &SayHelloRes{
 	//	Data: &SayHelloData{Val: "this is grpc val" + fmt.Sprintf("talent res is %+v", res)},
 	//}, nil
+
+	// res := thrift.SayHello(ctx, &testService.SayHelloReq{Val: 1})
 
 	return &SayHelloRes{
 		Data: &SayHelloData{Val: "this is grpc val"},
@@ -57,7 +58,6 @@ func TestGrpcServer2(t *testing.T) {
 
 func TestNewGrpcClient(t *testing.T) {
 	ctx := context.Background()
-	opentracing.SpanFromContext(ctx)
 
 	fmt.Println(SayHello(ctx, &SayHelloReq{}))
 

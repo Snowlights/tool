@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"vtool/idl/thrift/gen-go/thriftError"
+	"vtool/idl/thrift/gen-go/thriftBase"
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -15,12 +15,13 @@ var _ = thrift.ZERO
 var _ = fmt.Printf
 var _ = bytes.Equal
 
-var _ = thriftError.GoUnusedProtection__
+var _ = thriftBase.GoUnusedProtection__
 
 type TestService interface {
 	// Parameters:
 	//  - Req
-	SayHello(req *SayHelloReq) (r *SayHelloRes, err error)
+	//  - Ctx
+	SayHello(req *SayHelloReq, ctx *thriftBase.Context) (r *SayHelloRes, err error)
 }
 
 type TestServiceClient struct {
@@ -51,14 +52,15 @@ func NewTestServiceClientProtocol(t thrift.TTransport, iprot thrift.TProtocol, o
 
 // Parameters:
 //  - Req
-func (p *TestServiceClient) SayHello(req *SayHelloReq) (r *SayHelloRes, err error) {
-	if err = p.sendSayHello(req); err != nil {
+//  - Ctx
+func (p *TestServiceClient) SayHello(req *SayHelloReq, ctx *thriftBase.Context) (r *SayHelloRes, err error) {
+	if err = p.sendSayHello(req, ctx); err != nil {
 		return
 	}
 	return p.recvSayHello()
 }
 
-func (p *TestServiceClient) sendSayHello(req *SayHelloReq) (err error) {
+func (p *TestServiceClient) sendSayHello(req *SayHelloReq, ctx *thriftBase.Context) (err error) {
 	oprot := p.OutputProtocol
 	if oprot == nil {
 		oprot = p.ProtocolFactory.GetProtocol(p.Transport)
@@ -70,6 +72,7 @@ func (p *TestServiceClient) sendSayHello(req *SayHelloReq) (err error) {
 	}
 	args := SayHelloArgs{
 		Req: req,
+		Ctx: ctx,
 	}
 	if err = args.Write(oprot); err != nil {
 		return
@@ -182,7 +185,7 @@ func (p *testServiceProcessorSayHello) Process(seqId int32, iprot, oprot thrift.
 	result := SayHelloResult{}
 	var retval *SayHelloRes
 	var err2 error
-	if retval, err2 = p.handler.SayHello(args.Req); err2 != nil {
+	if retval, err2 = p.handler.SayHello(args.Req, args.Ctx); err2 != nil {
 		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing SayHello: "+err2.Error())
 		oprot.WriteMessageBegin("SayHello", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
@@ -213,7 +216,8 @@ func (p *testServiceProcessorSayHello) Process(seqId int32, iprot, oprot thrift.
 // HELPER FUNCTIONS AND STRUCTURES
 
 type SayHelloArgs struct {
-	Req *SayHelloReq `rpc_client:"req,1" json:"req"`
+	Req *SayHelloReq        `thrift:"req,1" json:"req"`
+	Ctx *thriftBase.Context `thrift:"ctx,2" json:"ctx"`
 }
 
 func NewSayHelloArgs() *SayHelloArgs {
@@ -228,8 +232,21 @@ func (p *SayHelloArgs) GetReq() *SayHelloReq {
 	}
 	return p.Req
 }
+
+var SayHelloArgs_Ctx_DEFAULT *thriftBase.Context
+
+func (p *SayHelloArgs) GetCtx() *thriftBase.Context {
+	if !p.IsSetCtx() {
+		return SayHelloArgs_Ctx_DEFAULT
+	}
+	return p.Ctx
+}
 func (p *SayHelloArgs) IsSetReq() bool {
 	return p.Req != nil
+}
+
+func (p *SayHelloArgs) IsSetCtx() bool {
+	return p.Ctx != nil
 }
 
 func (p *SayHelloArgs) Read(iprot thrift.TProtocol) error {
@@ -247,6 +264,10 @@ func (p *SayHelloArgs) Read(iprot thrift.TProtocol) error {
 		switch fieldId {
 		case 1:
 			if err := p.ReadField1(iprot); err != nil {
+				return err
+			}
+		case 2:
+			if err := p.ReadField2(iprot); err != nil {
 				return err
 			}
 		default:
@@ -272,11 +293,22 @@ func (p *SayHelloArgs) ReadField1(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *SayHelloArgs) ReadField2(iprot thrift.TProtocol) error {
+	p.Ctx = &thriftBase.Context{}
+	if err := p.Ctx.Read(iprot); err != nil {
+		return fmt.Errorf("%T error reading struct: %s", p.Ctx, err)
+	}
+	return nil
+}
+
 func (p *SayHelloArgs) Write(oprot thrift.TProtocol) error {
 	if err := oprot.WriteStructBegin("SayHello_args"); err != nil {
 		return fmt.Errorf("%T write struct begin error: %s", p, err)
 	}
 	if err := p.writeField1(oprot); err != nil {
+		return err
+	}
+	if err := p.writeField2(oprot); err != nil {
 		return err
 	}
 	if err := oprot.WriteFieldStop(); err != nil {
@@ -301,6 +333,19 @@ func (p *SayHelloArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
+func (p *SayHelloArgs) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("ctx", thrift.STRUCT, 2); err != nil {
+		return fmt.Errorf("%T write field begin error 2:ctx: %s", p, err)
+	}
+	if err := p.Ctx.Write(oprot); err != nil {
+		return fmt.Errorf("%T error writing struct: %s", p.Ctx, err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return fmt.Errorf("%T write field end error 2:ctx: %s", p, err)
+	}
+	return err
+}
+
 func (p *SayHelloArgs) String() string {
 	if p == nil {
 		return "<nil>"
@@ -309,7 +354,7 @@ func (p *SayHelloArgs) String() string {
 }
 
 type SayHelloResult struct {
-	Success *SayHelloRes `rpc_client:"success,0" json:"success"`
+	Success *SayHelloRes `thrift:"success,0" json:"success"`
 }
 
 func NewSayHelloResult() *SayHelloResult {
