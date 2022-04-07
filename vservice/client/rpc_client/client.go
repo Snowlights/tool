@@ -18,6 +18,7 @@ import (
 	"vtool/vservice/client/pool"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
+	"vtool/vtrace"
 )
 
 type RpcClient struct {
@@ -123,7 +124,7 @@ func (c *RpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc fun
 	}
 	defer c.clientPool.Put(ctx, serv, conn)
 
-	// todo: add trace info about tags and process
+	vtrace.SpanFromContent(ctx)
 	return fnRpc(ctx, conn.GetConn())
 }
 

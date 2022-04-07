@@ -52,14 +52,15 @@ func SpanDecorator(ctx context.Context,
 	req, resp interface{},
 	grpcError error) {
 	// todo more tag info added
-
+	span.SetTag("grpc.method", method)
 	servBase := GetServBase()
 	if servBase != nil {
 		servInfo := servBase.ServInfo()
 		if servInfo != nil {
+			span.SetTag("lane", servInfo.Lane)
+			span.SetTag("servType", common.Grpc)
 			serv, ok := servInfo.ServList[common.Grpc]
 			if ok {
-				span.SetTag("lane", servInfo.Lane)
 				span.SetTag("servIp", serv.Addr)
 				span.SetTag("engineType", serv.Type)
 			}

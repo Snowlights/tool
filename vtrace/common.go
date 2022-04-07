@@ -1,6 +1,8 @@
 package vtrace
 
 import (
+	"context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
 )
@@ -41,4 +43,8 @@ func buildServSamplerParamKey(servName string) string {
 var defaultSampler = &config.SamplerConfig{
 	Type:  jaeger.SamplerTypeRateLimiting,
 	Param: 1.0,
+}
+
+func SpanFromContent(ctx context.Context) opentracing.Span {
+	return opentracing.SpanFromContext(ctx)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"testing"
-	"time"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/grpc/grpc_protocol"
@@ -14,6 +13,12 @@ import (
 type helloServiceHandler struct{}
 
 func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*SayHelloRes, error) {
+
+	//res := TalentSayHello(ctx, req)
+	//
+	//return &SayHelloRes{
+	//	Data: &SayHelloData{Val: "this is grpc val" + fmt.Sprintf("talent res is %+v", res)},
+	//}, nil
 
 	return &SayHelloRes{
 		Data: &SayHelloData{Val: "this is grpc val"},
@@ -51,10 +56,10 @@ func TestGrpcServer2(t *testing.T) {
 }
 
 func TestNewGrpcClient(t *testing.T) {
+	ctx := context.Background()
+	opentracing.SpanFromContext(ctx)
 
-	span := opentracing.GlobalTracer().StartSpan("TestNewGrpcClient")
-	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
-	span.Finish()
+	fmt.Println(SayHello(ctx, &SayHelloReq{}))
 
-	time.Sleep(time.Hour)
+	// time.Sleep(time.Hour)
 }
