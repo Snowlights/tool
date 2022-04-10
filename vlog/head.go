@@ -1,7 +1,10 @@
 package vlog
 
 import (
+	"context"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
+	"github.com/uber/jaeger-client-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"runtime"
@@ -28,6 +31,8 @@ const (
 	TimeHead        = "ts"
 	ServiceNameHead = "service"
 	ServiceHost     = "host"
+	traceId         = "traceId"
+	tracingError    = "error"
 
 	callerFunction = "caller"
 
@@ -47,9 +52,27 @@ func (l Logger) getRuntimeInfo() (function, filename string, lineno int) {
 	return
 }
 
-func (l Logger) buildHead(level, msg string) []zap.Field {
+func (l Logger) buildHead(ctx context.Context, level, msg string) []zap.Field {
+
+	// trace id
+	var traceID string
+	span := opentracing.SpanFromContext(ctx)
+	if span != nil {
+		if sc, ok := span.Context().(jaeger.SpanContext); ok {
+			traceID = fmt.Sprint(sc.TraceID())
+		}
+
+		// set tracing error log tag
+		if level >= ErrorLevel {
+			span.SetTag(tracingError, true)
+		}
+	}
 
 	_, filename, lineno := l.getRuntimeInfo()
+	if span != nil {
+		span.LogKV(Level, level, callerFunction, fmt.Sprintf("%s:%d", filename, lineno),
+			Body, msg)
+	}
 	kvs := append([]zap.Field{},
 		zap.Field{
 			Key:    callerFunction,
@@ -62,6 +85,7 @@ func (l Logger) buildHead(level, msg string) []zap.Field {
 			String: level,
 		},
 		zap.Namespace(Head),
+		zap.String(traceId, traceID),
 		zap.Time(TimeHead, time.Now()),
 		zap.String(ServiceNameHead, l.ServiceName),
 		zap.String(ServiceHost, l.Host),

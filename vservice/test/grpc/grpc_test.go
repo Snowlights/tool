@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"vtool/vlog"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/grpc/grpc_protocol"
@@ -20,6 +21,8 @@ func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*
 	//}, nil
 
 	// res := thrift.SayHello(ctx, &testService.SayHelloReq{Val: 1})
+
+	vlog.ErrorF(ctx, "grpc say hello req is %+v", req)
 
 	return &SayHelloRes{
 		Data: &SayHelloData{Val: "this is grpc val"},
