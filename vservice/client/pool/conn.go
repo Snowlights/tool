@@ -11,15 +11,6 @@ import (
 	"vtool/vservice/common"
 )
 
-const (
-	DefaultStatTime       = time.Millisecond * 100
-	DefaultIdle           = 128
-	DefaultMaxActive      = 256
-	DefaultIdleTimeout    = time.Minute
-	DefaultWaitTimeout    = time.Second * 3
-	DefaultGetConnTimeout = time.Second
-)
-
 type ConnPool struct {
 	newConn func(string) (common.RpcConn, error)
 
@@ -97,17 +88,24 @@ func (ci *connItem) expire(timeout time.Duration) bool {
 func NewConnPool(conf *ConnPoolConfig, newConn func(string) (common.RpcConn, error)) *ConnPool {
 
 	if conf.statTime == 0 {
-		conf.statTime = DefaultStatTime
+		conf.statTime = vconfig.DefaultStatTimeout
 	}
 	if conf.idle == 0 {
-		conf.idle = DefaultIdle
+		conf.idle = vconfig.DefaultIdleNum
 	}
 	if conf.maxActive == 0 {
-		conf.idle = DefaultMaxActive
+		conf.idle = vconfig.DefaultMaxActive
 	}
-	if conf.maxActive > conf.idle {
-		conf.maxActive = DefaultMaxActive
-		conf.idle = DefaultIdle
+	if conf.maxActive < conf.idle {
+		conf.maxActive = vconfig.DefaultMaxActive
+		conf.idle = vconfig.DefaultIdleNum
+	}
+	if conf.idleTimeout == 0 {
+		conf.idleTimeout = vconfig.DefaultIdleTimeout
+	}
+
+	if conf.waitTimeOut == 0 {
+		conf.waitTimeOut = vconfig.DefaultWaitTimeout
 	}
 
 	c := &ConnPool{
@@ -127,10 +125,10 @@ func (cp *ConnPool) ResetConfig(cfg *vconfig.ClientConfig) {
 
 	cp.conf.idle = cfg.Idle
 	cp.conf.maxActive = cfg.MaxActive
-	cp.conf.idleTimeout = time.Duration(cfg.IdleTimeout)
+	cp.conf.idleTimeout = time.Duration(cfg.IdleTimeout) * time.Millisecond
 	cp.conf.wait = cfg.Wait
-	cp.conf.waitTimeOut = time.Duration(cfg.WaitTimeout)
-	cp.conf.statTime = time.Duration(cfg.StatTime)
+	cp.conf.waitTimeOut = time.Duration(cfg.WaitTimeout) * time.Millisecond
+	cp.conf.statTime = time.Duration(cfg.StatTime) * time.Millisecond
 }
 
 func (cp *ConnPool) stat() {
@@ -187,7 +185,6 @@ func (cp *ConnPool) Get(ctx context.Context) (common.RpcConn, error) {
 		cp.mu.Unlock()
 		return nil, nil
 	}
-	fmt.Println("Get", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
 	for {
 		for index, length := 0, cp.connList.Len(); index < length; index++ {
 			e := cp.connList.Front()
@@ -245,7 +242,6 @@ func (cp *ConnPool) Get(ctx context.Context) (common.RpcConn, error) {
 
 func (cp *ConnPool) Put(ctx context.Context, rpcConn common.RpcConn) error {
 	cp.mu.Lock()
-	fmt.Println("Put", "cp.active:", cp.active, "cp.idle:", cp.connList.Len())
 
 	if cp.closed {
 		cp.mu.Unlock()
@@ -265,10 +261,10 @@ func (cp *ConnPool) Put(ctx context.Context, rpcConn common.RpcConn) error {
 	})
 	if int64(cp.connList.Len()) > cp.getIdle() {
 		rpcConn = cp.connList.Remove(cp.connList.Back()).(connItem).conn
+		cp.active--
 	} else {
 		rpcConn = nil
 	}
-	cp.active--
 	cp.mu.Unlock()
 
 	if rpcConn == nil {

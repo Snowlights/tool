@@ -76,82 +76,82 @@ func (l Logger) debug(ctx context.Context, args ...interface{}) {
 	if !l.checkIsLog(zapcore.DebugLevel) {
 		return
 	}
-	l.zap.Debug("", l.buildHead(DebugLevel, fmt.Sprint(args...))...)
+	l.zap.Debug("", l.buildHead(ctx, DebugLevel, fmt.Sprint(args...))...)
 }
 
 func (l Logger) debugF(ctx context.Context, template string, args ...interface{}) {
 	if !l.checkIsLog(zapcore.DebugLevel) {
 		return
 	}
-	l.zap.Debug("", l.buildHead(DebugLevel, fmt.Sprintf(template, args...))...)
+	l.zap.Debug("", l.buildHead(ctx, DebugLevel, fmt.Sprintf(template, args...))...)
 }
 
 func (l Logger) info(ctx context.Context, args ...interface{}) {
 	if !l.checkIsLog(zapcore.InfoLevel) {
 		return
 	}
-	l.zap.Info("", l.buildHead(InfoLevel, fmt.Sprint(args...))...)
+	l.zap.Info("", l.buildHead(ctx, InfoLevel, fmt.Sprint(args...))...)
 }
 
 func (l Logger) infoF(ctx context.Context, template string, args ...interface{}) {
 	if !l.checkIsLog(zapcore.InfoLevel) {
 		return
 	}
-	l.zap.Info("", l.buildHead(InfoLevel, fmt.Sprintf(template, args...))...)
+	l.zap.Info("", l.buildHead(ctx, InfoLevel, fmt.Sprintf(template, args...))...)
 }
 
 func (l Logger) warn(ctx context.Context, args ...interface{}) {
 	if !l.checkIsLog(zapcore.WarnLevel) {
 		return
 	}
-	l.zap.Warn("", l.buildHead(WarnLevel, fmt.Sprint(args...))...)
+	l.zap.Warn("", l.buildHead(ctx, WarnLevel, fmt.Sprint(args...))...)
 }
 
 func (l Logger) warnF(ctx context.Context, template string, args ...interface{}) {
 	if !l.checkIsLog(zapcore.WarnLevel) {
 		return
 	}
-	l.zap.Warn("", l.buildHead(WarnLevel, fmt.Sprintf(template, args...))...)
+	l.zap.Warn("", l.buildHead(ctx, WarnLevel, fmt.Sprintf(template, args...))...)
 }
 
 func (l Logger) error(ctx context.Context, args ...interface{}) {
 	if !l.checkIsLog(zapcore.ErrorLevel) {
 		return
 	}
-	l.zap.Error("", l.buildHead(ErrorLevel, fmt.Sprint(args...))...)
+	l.zap.Error("", l.buildHead(ctx, ErrorLevel, fmt.Sprint(args...))...)
 }
 
 func (l Logger) errorF(ctx context.Context, template string, args ...interface{}) {
 	if !l.checkIsLog(zapcore.ErrorLevel) {
 		return
 	}
-	l.zap.Error("", l.buildHead(ErrorLevel, fmt.Sprintf(template, args...))...)
+	l.zap.Error("", l.buildHead(ctx, ErrorLevel, fmt.Sprintf(template, args...))...)
 }
 
 func (l Logger) panic(ctx context.Context, args ...interface{}) {
 	if !l.checkIsLog(zapcore.PanicLevel) {
 		return
 	}
-	l.zap.Panic("", l.buildHead(PanicLevel, fmt.Sprint(args...))...)
+	l.zap.Panic("", l.buildHead(ctx, PanicLevel, fmt.Sprint(args...))...)
 }
 
 func (l Logger) panicF(ctx context.Context, template string, args ...interface{}) {
 	if !l.checkIsLog(zapcore.PanicLevel) {
 		return
 	}
-	l.zap.Panic("", l.buildHead(PanicLevel, fmt.Sprintf(template, args...))...)
+	l.zap.Panic("", l.buildHead(ctx, PanicLevel, fmt.Sprintf(template, args...))...)
 }
 
 func (l Logger) fatal(ctx context.Context, args ...interface{}) {
 	if !l.checkIsLog(zapcore.FatalLevel) {
 		return
 	}
-	l.zap.Fatal("", l.buildHead(FatalLevel, fmt.Sprint(args...))...)
+	l.zap.Fatal("", l.buildHead(ctx, FatalLevel, fmt.Sprint(args...))...)
 }
 
 func (l Logger) fatalF(ctx context.Context, template string, args ...interface{}) {
 	if !l.checkIsLog(zapcore.FatalLevel) {
 		return
 	}
-	l.zap.Fatal("", l.buildHead(FatalLevel, fmt.Sprintf(template, args...))...)
+	l.zap.Fatal("", l.buildHead(ctx, FatalLevel, fmt.Sprintf(template, args...))...)
 }

@@ -5,7 +5,11 @@ import (
 	"vtool/vconfig"
 )
 
-const ServWeight = 100
+const (
+	ServWeight = 100
+
+	ContentKey = "vtool.content"
+)
 
 type RegisterServiceInfo struct {
 	ServPath string                       `json:"serv_path"`

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "vtool/idl/grpc/grpcError";
+option go_package = "vtool/idl/grpc/grpcBase";
 
-package grpcError;
+package grpcBase;
 
 message ErrInfo {
     int32 code = 1;

@@ -3,7 +3,6 @@ package etcd
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strconv"
 	"strings"
@@ -109,7 +108,6 @@ func (c *Client) GetServAddr(lane string, serviceType common.ServiceType, hashKe
 		return nil, false
 	}
 
-	fmt.Println(key, hashKey)
 	servPathPartIndex := strings.LastIndex(key, common.HashKey)
 	servPath := key[:servPathPartIndex]
 	for _, serv := range c.servList {

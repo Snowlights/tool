@@ -16,8 +16,13 @@ const (
 	// client config
 	Client = "client"
 
-	BackupPath = "backupPath"
+	// middleware config
+	MiddlewareAppID          = "middleware"
+	MiddlewareNamespaceTrace = "trace"
+	MiddlewareNamespaceMQ    = "mq"
+	MiddlewareNamespaceDB    = "db"
 
+	BackupPath = "backupPath"
 	httpScheme = "http://"
 
 	dot   = "."
@@ -73,14 +78,50 @@ type ServerConfig struct {
 }
 
 type ClientConfig struct {
-	Idle        int64         `json:"idle" properties:"idle"`
-	IdleTimeout time.Duration `json:"idle_timeout" properties:"idle_timeout"`
-	MaxActive   int64         `json:"max_active" properties:"max_active"`
-	StatTime    time.Duration `json:"stat_time" properties:"stat_time"`
-	Wait        bool          `json:"wait" properties:"wait"`
-	WaitTimeout time.Duration `json:"wait_timeout" properties:"wait_timeout"`
+	Idle        int64 `json:"idle" properties:"idle"`
+	IdleTimeout int64 `json:"idle_timeout" properties:"idle_timeout"`
+	MaxActive   int64 `json:"max_active" properties:"max_active"`
+	StatTime    int64 `json:"stat_time" properties:"stat_time"`
+	Wait        bool  `json:"wait" properties:"wait"`
+	WaitTimeout int64 `json:"wait_timeout" properties:"wait_timeout"`
 
-	GetConnTimeout time.Duration `json:"get_conn_timeout" properties:"get_conn_timeout"`
+	RetryTime   int64 `json:"retry_time" properties:"retry_time"`
+	CallTimeout int64 `json:"call_timeout" properties:"call_timeout"`
+
+	GetConnTimeout int64 `json:"get_conn_timeout" properties:"get_conn_timeout"`
+}
+
+const (
+	defaultStatTime    = 100
+	DefaultStatTimeout = 100 * time.Millisecond
+
+	DefaultIdleNum     = 128
+	defaultIdleTime    = 60000
+	DefaultIdleTimeout = time.Minute
+
+	DefaultMaxActive = 256
+
+	defaultWaitTime    = 1000
+	DefaultWaitTimeout = time.Second * 3
+
+	defaultGetConnTime    = 1000
+	DefaultGetConnTimeout = time.Second
+
+	CallRetryTimes     = 3
+	defaultCallTime    = 10000
+	DefaultCallTimeout = time.Second * 10
+)
+
+var DefaultClientConfig = &ClientConfig{
+	Idle:           DefaultIdleNum,
+	IdleTimeout:    defaultIdleTime,
+	MaxActive:      DefaultMaxActive,
+	StatTime:       defaultStatTime,
+	Wait:           true,
+	WaitTimeout:    defaultWaitTime,
+	RetryTime:      CallRetryTimes,
+	CallTimeout:    defaultCallTime,
+	GetConnTimeout: defaultGetConnTime,
 }
 
 const (
@@ -100,16 +141,16 @@ type CenterConfigEnv struct {
 }
 
 func ParseConfigEnv() (*CenterConfigEnv, error) {
-	apolloCluster := os.Getenv(APOLLO_CLUSTER)
-	if apolloCluster == "" {
+	apolloCluster, ok := os.LookupEnv(APOLLO_CLUSTER)
+	if !ok {
 		return nil, InvalidCluster
 	}
-	apolloIP := os.Getenv(APOLLO_IP)
-	if apolloIP == "" {
+	apolloIP, ok := os.LookupEnv(APOLLO_IP)
+	if !ok {
 		return nil, InvalidIp
 	}
-	apolloPort := os.Getenv(APOLLO_PORT)
-	if apolloPort == "" {
+	apolloPort, ok := os.LookupEnv(APOLLO_PORT)
+	if !ok {
 		return nil, InvalidPort
 	}
 

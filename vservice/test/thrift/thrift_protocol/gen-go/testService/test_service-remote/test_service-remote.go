@@ -20,7 +20,7 @@ func Usage() {
 	fmt.Fprintln(os.Stderr, "Usage of ", os.Args[0], " [-h host:port] [-u url] [-f[ramed]] function [arg1 [arg2...]]:")
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "\nFunctions:")
-	fmt.Fprintln(os.Stderr, "  SayHelloRes SayHello(SayHelloReq req)")
+	fmt.Fprintln(os.Stderr, "  SayHelloRes SayHello(SayHelloReq req, Context ctx)")
 	fmt.Fprintln(os.Stderr)
 	os.Exit(0)
 }
@@ -116,8 +116,8 @@ func main() {
 
 	switch cmd {
 	case "SayHello":
-		if flag.NArg()-1 != 1 {
-			fmt.Fprintln(os.Stderr, "SayHello requires 1 args")
+		if flag.NArg()-1 != 2 {
+			fmt.Fprintln(os.Stderr, "SayHello requires 2 args")
 			flag.Usage()
 		}
 		arg4 := flag.Arg(1)
@@ -137,7 +137,24 @@ func main() {
 			return
 		}
 		value0 := argvalue0
-		fmt.Print(client.SayHello(value0))
+		arg10 := flag.Arg(2)
+		mbTrans11 := thrift.NewTMemoryBufferLen(len(arg10))
+		defer mbTrans11.Close()
+		_, err12 := mbTrans11.WriteString(arg10)
+		if err12 != nil {
+			Usage()
+			return
+		}
+		factory13 := thrift.NewTSimpleJSONProtocolFactory()
+		jsProt14 := factory13.GetProtocol(mbTrans11)
+		argvalue1 := testService.NewContext()
+		err15 := argvalue1.Read(jsProt14)
+		if err15 != nil {
+			Usage()
+			return
+		}
+		value1 := argvalue1
+		fmt.Print(client.SayHello(value0, value1))
 		fmt.Print("\n")
 		break
 	case "":

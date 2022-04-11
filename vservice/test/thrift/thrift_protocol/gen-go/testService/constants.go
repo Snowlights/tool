@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"vtool/idl/thrift/gen-go/thriftError"
+	"vtool/idl/thrift/gen-go/thriftBase"
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -15,7 +15,7 @@ var _ = thrift.ZERO
 var _ = fmt.Printf
 var _ = bytes.Equal
 
-var _ = thriftError.GoUnusedProtection__
+var _ = thriftBase.GoUnusedProtection__
 
 func init() {
 }

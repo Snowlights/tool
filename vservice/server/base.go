@@ -16,6 +16,7 @@ import (
 	"vtool/vservice/server/engine"
 	"vtool/vservice/server/register"
 	"vtool/vservice/server/register/consul"
+	"vtool/vtrace"
 )
 
 type ServiceBase struct {
@@ -73,6 +74,8 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 		return nil, err
 	}
 
+	vtrace.InitJaegerTracer(servBase.ServName())
+
 	return servBase, nil
 }
 
@@ -124,9 +127,20 @@ func (sb *ServiceBase) FullServiceRegisterPath() string {
 
 func (sb *ServiceBase) Stop() {
 	ctx := context.Background()
-	sb.register.UnRegister(ctx, sb.FullServiceRegisterPath())
-	sb.metricRegister.UnRegister(ctx, sb.FullServiceRegisterPath())
-	sb.shutDown()
+	if sb.register != nil {
+		sb.register.UnRegister(ctx, sb.FullServiceRegisterPath())
+	}
+	if sb.metricRegister != nil {
+		sb.metricRegister.UnRegister(ctx, sb.FullServiceRegisterPath())
+	}
+	if sb.shutDown != nil {
+		sb.shutDown()
+	}
+
+	if vtrace.GlobalTracer != nil {
+		vtrace.GlobalTracer.Close()
+	}
+
 }
 
 func (sb *ServiceBase) initRegisterEngines() error {

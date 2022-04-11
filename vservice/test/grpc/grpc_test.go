@@ -3,23 +3,29 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"testing"
-	"time"
-	"vtool/idl/grpc/grpcError"
-	clientCommon "vtool/vservice/client/common"
-	clientGrpc "vtool/vservice/client/grpc"
+	"vtool/vlog"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/grpc/grpc_protocol"
 )
 
-type helloServiceHandler struct {
-}
+type helloServiceHandler struct{}
 
 func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*SayHelloRes, error) {
+
+	//res := TalentSayHello(ctx, req)
+	//
+	//return &SayHelloRes{
+	//	Data: &SayHelloData{Val: "this is grpc val" + fmt.Sprintf("talent res is %+v", res)},
+	//}, nil
+
+	// res := thrift.SayHello(ctx, &testService.SayHelloReq{Val: 1})
+
+	vlog.ErrorF(ctx, "grpc say hello req is %+v", req)
+
 	return &SayHelloRes{
-		Data: &SayHelloData{Val: "this is val"},
+		Data: &SayHelloData{Val: "this is grpc val"},
 	}, nil
 }
 
@@ -53,57 +59,10 @@ func TestGrpcServer2(t *testing.T) {
 	}
 }
 
-var grpcClient common.RpcClient
-
-func rpc(ctx context.Context, hashKey string, timeout time.Duration, fn func(TestServiceClient) error) error {
-	return grpcClient.Rpc(&common.ClientCallerArgs{
-		Lane:    "",
-		HashKey: hashKey,
-		TimeOut: timeout,
-	}, func(c interface{}) error {
-		ct, ok := c.(TestServiceClient)
-		if ok {
-			return fn(ct)
-		} else {
-			return fmt.Errorf("reflect client grpc error")
-		}
-	})
-}
-
-func SayHello(ctx context.Context, req *SayHelloReq) (res *SayHelloRes) {
-	err := rpc(ctx, "", time.Millisecond*3000,
-		func(c TestServiceClient) (e error) {
-			res, e = c.SayHello(ctx, req)
-			return e
-		})
-
-	if err != nil {
-		res = &SayHelloRes{
-			ErrInfo: &grpcError.ErrInfo{
-				Code: -1,
-				Msg:  fmt.Sprintf("rpc service:%s serv:%s method:SayHello err:%v", "censor", common.Grpc, err),
-			},
-		}
-	}
-	return
-}
-
 func TestNewGrpcClient(t *testing.T) {
+	ctx := context.Background()
 
-	client, _ := clientCommon.NewClientWithClientConfig(&common.ClientConfig{
-		RegistrationType: common.ETCD,
-		Cluster:          []string{"127.0.0.1:2379"},
-		ServGroup:        "base/talent",
-		ServName:         "censor",
-	})
+	fmt.Println(SayHello(ctx, &SayHelloReq{}))
 
-	servCli := func(conn *grpc.ClientConn) interface{} {
-		return NewTestServiceClient(conn)
-	}
-
-	grpcClient = clientGrpc.NewGrpcClient(client, servCli)
-
-	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
-
-	time.Sleep(time.Hour)
+	// time.Sleep(time.Hour)
 }
