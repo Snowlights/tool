@@ -82,6 +82,10 @@ func (jt *JaegerTracer) updateTracer(tracer opentracing.Tracer, closer io.Closer
 	jt.baseTracer.closer = closer
 }
 
+func (jt *JaegerTracer) Close() {
+	jt.baseTracer.closer.Close()
+}
+
 func (jt *JaegerTracer) buildJaegerConfig() *config.Configuration {
 	return &config.Configuration{
 		ServiceName: jt.servName,
@@ -92,6 +96,7 @@ func (jt *JaegerTracer) buildJaegerConfig() *config.Configuration {
 		Headers: jt.builderHeaders(),
 	}
 }
+
 func (jt *JaegerTracer) buildSampler() (res *config.SamplerConfig) {
 	// think about namespaces and services need to be sampled
 	res = defaultSampler

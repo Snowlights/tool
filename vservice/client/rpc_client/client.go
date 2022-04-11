@@ -59,20 +59,45 @@ func NewRpcClient(client common.Client, thriftServCli func(thrift.TTransport, th
 
 	rpcCli.center.AddListener(&common.ClientListener{Change: rpcCli.reload})
 	rpcCli.reload()
-	cfg := rpcCli.getConfig()
-	cfg = vconfig.DefaultClientConfig
-	rpcCli.clientPool = pool.NewClientPool(&pool.ClientPoolConfig{
-		ServiceName:    client.ServName(),
-		Idle:           cfg.Idle,
-		Active:         cfg.MaxActive,
-		IdleTimeout:    time.Duration(cfg.IdleTimeout) * time.Millisecond,
-		Wait:           cfg.Wait,
-		WaitTimeOut:    time.Duration(cfg.WaitTimeout) * time.Millisecond,
-		StatTime:       time.Duration(cfg.StatTime) * time.Millisecond,
-		GetConnTimeout: time.Duration(cfg.GetConnTimeout) * time.Millisecond,
-	}, newConnFunc)
+	rpcCli.clientPool = pool.NewClientPool(rpcCli.loadClientPoolConfig(client.ServName()), newConnFunc)
 	rpcCli.client.AddPoolHandler(rpcCli.deleteAddrHandler)
 	return rpcCli
+}
+
+func (c *RpcClient) loadClientPoolConfig(servName string) *pool.ClientPoolConfig {
+	clientConfig, apolloConfig := vconfig.DefaultClientConfig, c.getConfig()
+	clientPoolConfig := &pool.ClientPoolConfig{
+		ServiceName:    servName,
+		Idle:           clientConfig.Idle,
+		Active:         clientConfig.MaxActive,
+		IdleTimeout:    time.Duration(clientConfig.IdleTimeout) * time.Millisecond,
+		Wait:           clientConfig.Wait,
+		WaitTimeOut:    time.Duration(clientConfig.WaitTimeout) * time.Millisecond,
+		StatTime:       time.Duration(clientConfig.StatTime) * time.Millisecond,
+		GetConnTimeout: time.Duration(clientConfig.GetConnTimeout) * time.Millisecond,
+	}
+
+	clientPoolConfig.Wait = apolloConfig.Wait
+	if apolloConfig.StatTime != 0 {
+		clientPoolConfig.StatTime = time.Duration(apolloConfig.StatTime) * time.Millisecond
+	}
+	if apolloConfig.IdleTimeout != 0 {
+		clientPoolConfig.IdleTimeout = time.Duration(apolloConfig.IdleTimeout) * time.Millisecond
+	}
+	if apolloConfig.WaitTimeout != 0 {
+		clientPoolConfig.WaitTimeOut = time.Duration(apolloConfig.WaitTimeout) * time.Millisecond
+	}
+	if apolloConfig.GetConnTimeout != 0 {
+		clientPoolConfig.GetConnTimeout = time.Duration(apolloConfig.GetConnTimeout) * time.Millisecond
+	}
+	if apolloConfig.MaxActive != 0 {
+		clientPoolConfig.Active = apolloConfig.MaxActive
+	}
+	if apolloConfig.Idle != 0 {
+		clientPoolConfig.Idle = apolloConfig.Idle
+	}
+
+	return clientPoolConfig
 }
 
 func (c *RpcClient) Rpc(ctx context.Context, args *common.ClientCallerArgs, fnRpc func(context.Context, interface{}) error) error {
