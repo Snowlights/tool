@@ -18,7 +18,6 @@ func (c *ThriftPower) Power(ctx context.Context, addr string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// todo tracing and other middleware
 	// this should be init before power
 	transportFactory := thrift.NewTFramedTransportFactory(thrift.NewTTransportFactory())
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()

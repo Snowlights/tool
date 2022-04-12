@@ -32,6 +32,30 @@ const (
 	globalSamplerParam = "global_sampler_param"
 )
 
+const (
+	Component = "component"
+	SpanKind  = "span.kind"
+)
+
+// server span tags
+const (
+	Lane       = "lane"
+	ServType   = "servType"
+	ServIP     = "servIP"
+	EngineType = "engineType"
+)
+
+// sql span tags
+const (
+	ComponentSQL = "sql"
+	SpanKindSQL  = "client"
+
+	Cluster = "cluster"
+	Schema  = "schema"
+	Table   = "table"
+	Query   = "query"
+)
+
 func buildServSamplerTypeKey(servName string) string {
 	return servSamplerTypePrefix + servName
 }

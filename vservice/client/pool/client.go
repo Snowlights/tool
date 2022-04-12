@@ -34,7 +34,6 @@ func NewClientPool(conf *ClientPoolConfig, newConn func(string) (common.RpcConn,
 	return &ClientPool{conf: conf, newConn: newConn}
 }
 
-// todo reset pool config
 func (c *ClientPool) ResetConfig(cfg *vconfig.ClientConfig) {
 	c.cMu.Lock()
 	defer c.cMu.Unlock()

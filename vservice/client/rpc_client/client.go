@@ -161,18 +161,18 @@ func (c *RpcClient) injectServ(ctx context.Context) context.Context {
 		servInfo := servBase.ServInfo()
 		if servInfo != nil {
 			injectServInfoMap := make(map[string]string)
-			injectServInfoMap["lane"] = servInfo.Lane
+			injectServInfoMap[vtrace.Lane] = servInfo.Lane
 			serv, ok := servInfo.ServList[common.Grpc]
 			if ok {
-				injectServInfoMap["servType"] = string(common.Grpc)
-				injectServInfoMap["servIp"] = serv.Addr
-				injectServInfoMap["engineType"] = string(serv.Type)
+				injectServInfoMap[vtrace.ServType] = string(common.Grpc)
+				injectServInfoMap[vtrace.ServIP] = serv.Addr
+				injectServInfoMap[vtrace.ServIP] = string(serv.Type)
 			}
 			serv, ok = servInfo.ServList[common.Thrift]
 			if ok {
-				injectServInfoMap["servType"] = string(common.Thrift)
-				injectServInfoMap["servIp"] = serv.Addr
-				injectServInfoMap["engineType"] = string(serv.Type)
+				injectServInfoMap[vtrace.ServType] = string(common.Thrift)
+				injectServInfoMap[vtrace.ServIP] = serv.Addr
+				injectServInfoMap[vtrace.EngineType] = string(serv.Type)
 			}
 			ctx = context.WithValue(ctx, clientCommon.InjectServKey, injectServInfoMap)
 		}

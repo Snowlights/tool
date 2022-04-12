@@ -7,6 +7,7 @@ import (
 	"vtool/idl/thrift/gen-go/thriftBase"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
+	"vtool/vtrace"
 )
 
 const (
@@ -33,20 +34,20 @@ func NewContextFromThriftBaseContext(operation string, tctx *thriftBase.Context)
 	if servBase != nil {
 		servInfo := servBase.ServInfo()
 		if servInfo != nil {
-			span.SetTag("lane", servInfo.Lane)
+			span.SetTag(vtrace.Lane, servInfo.Lane)
 			serv, ok := servInfo.ServList[common.Grpc]
 			if ok {
-				span.SetTag("servType", common.Grpc)
-				span.SetTag("servIp", serv.Addr)
-				span.SetTag("engineType", serv.Type)
+				span.SetTag(vtrace.ServType, common.Grpc)
+				span.SetTag(vtrace.ServIP, serv.Addr)
+				span.SetTag(vtrace.EngineType, serv.Type)
 			}
 			serv, ok = servInfo.ServList[common.Thrift]
 			if ok {
-				span.SetTag("component", "thrift")
-				span.SetTag("span.kind", "server")
-				span.SetTag("servType", common.Thrift)
-				span.SetTag("servIp", serv.Addr)
-				span.SetTag("engineType", serv.Type)
+				span.SetTag(vtrace.Component, "thrift")
+				span.SetTag(vtrace.SpanKind, "server")
+				span.SetTag(vtrace.ServType, common.Thrift)
+				span.SetTag(vtrace.ServIP, serv.Addr)
+				span.SetTag(vtrace.EngineType, serv.Type)
 			}
 		}
 	}
