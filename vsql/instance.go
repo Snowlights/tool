@@ -1,6 +1,7 @@
 package vsql
 
-type Instance struct{}
+type Instance struct {
+}
 
 func NewInstance() *Instance {
 

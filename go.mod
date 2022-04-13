@@ -13,6 +13,8 @@ require (
 	github.com/hashicorp/consul/api v1.12.0
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
+	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb // indirect
+	github.com/pingcap/tidb v1.1.0-beta.0.20200630082100-328b6d0a955c // indirect
 	github.com/prometheus/client_golang v1.12.1
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
 	github.com/shirou/gopsutil v2.21.11+incompatible
