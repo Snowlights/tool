@@ -12,7 +12,9 @@ const (
 	// server app config
 	Application = "application"
 	// server config
-	Server = "server"
+	Server   = "server"
+	ServerDB = "mysql"
+
 	// client config
 	Client = "client"
 
@@ -20,7 +22,6 @@ const (
 	MiddlewareAppID          = "middleware"
 	MiddlewareNamespaceTrace = "trace"
 	MiddlewareNamespaceMQ    = "mq"
-	MiddlewareNamespaceDB    = "db"
 
 	BackupPath = "backupPath"
 	httpScheme = "http://"

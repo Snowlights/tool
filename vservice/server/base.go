@@ -16,6 +16,7 @@ import (
 	"vtool/vservice/server/engine"
 	"vtool/vservice/server/register"
 	"vtool/vservice/server/register/consul"
+	"vtool/vsql"
 	"vtool/vtrace"
 )
 
@@ -65,6 +66,11 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 	}
 
 	err := servBase.initCenter(args)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = vsql.InitManager(servBase.center)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +217,7 @@ func (sb *ServiceBase) parseConfigEnv(args *servArgs) (*vconfig.CenterConfig, er
 		AppID:   args.serviceGroup + common.Slash + args.serviceName,
 		Cluster: centerConfig.Cluster,
 		// todo db、mq、redis config
-		Namespace:        []string{vconfig.Application, vconfig.Server},
+		Namespace:        []string{vconfig.Application, vconfig.Server, vconfig.ServerDB},
 		IP:               centerConfig.IP,
 		Port:             int(port),
 		IsBackupConfig:   centerConfig.IsBackupConfig,

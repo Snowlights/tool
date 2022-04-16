@@ -14,15 +14,15 @@ type DBContent interface {
 }
 
 type DB struct {
-	db                     *sql.DB
-	cluster, schema, table string
+	db              *sql.DB
+	cluster, schema string
 }
 
 func (db *DB) Begin(ctx context.Context) (*TX, error) {
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, dbBeginOperation)
 	defer span.Finish()
-	setDBSpanTags(span, db.cluster, db.schema, db.table, "")
+	setDBSpanTags(span, db.cluster, db.schema, "", "")
 
 	tx, err := db.db.Begin()
 	if err != nil {
@@ -33,18 +33,13 @@ func (db *DB) Begin(ctx context.Context) (*TX, error) {
 		tx:      tx,
 		cluster: db.cluster,
 		schema:  db.schema,
-		table:   db.table,
 	}, nil
 }
 
 func (db *DB) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, dbQueryOperation)
 	defer span.Finish()
-	tables := parseTable(query)
-	if tables == "" {
-		tables = db.table
-	}
-	setDBSpanTags(span, db.cluster, db.schema, tables, query)
+	setDBSpanTags(span, db.cluster, db.schema, parseTable(query), query)
 
 	return db.db.QueryContext(ctx, query, args...)
 }
@@ -52,24 +47,20 @@ func (db *DB) QueryContext(ctx context.Context, query string, args ...interface{
 func (db *DB) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, dbExecOperation)
 	defer span.Finish()
-	setDBSpanTags(span, db.cluster, db.schema, db.table, query)
+	setDBSpanTags(span, db.cluster, db.schema, parseTable(query), query)
 
 	return db.db.ExecContext(ctx, query, args...)
 }
 
 type TX struct {
-	tx                     *sql.Tx
-	cluster, schema, table string
+	tx              *sql.Tx
+	cluster, schema string
 }
 
 func (tx *TX) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, txQueryOperation)
 	defer span.Finish()
-	tables := parseTable(query)
-	if tables == "" {
-		tables = tx.table
-	}
-	setDBSpanTags(span, tx.cluster, tx.schema, tables, query)
+	setDBSpanTags(span, tx.cluster, tx.schema, parseTable(query), query)
 
 	return tx.tx.QueryContext(ctx, query, args...)
 }
@@ -77,11 +68,7 @@ func (tx *TX) QueryContext(ctx context.Context, query string, args ...interface{
 func (tx *TX) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, txExecOperation)
 	defer span.Finish()
-	tables := parseTable(query)
-	if tables == "" {
-		tables = tx.table
-	}
-	setDBSpanTags(span, tx.cluster, tx.schema, tables, query)
+	setDBSpanTags(span, tx.cluster, tx.schema, parseTable(query), query)
 
 	return tx.tx.ExecContext(ctx, query, args...)
 }
@@ -89,7 +76,7 @@ func (tx *TX) ExecContext(ctx context.Context, query string, args ...interface{}
 func (tx *TX) Commit(ctx context.Context) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, txCommitOperation)
 	defer span.Finish()
-	setDBSpanTags(span, tx.cluster, tx.schema, tx.table, "")
+	setDBSpanTags(span, tx.cluster, tx.schema, "", "")
 
 	return tx.tx.Commit()
 }
@@ -97,7 +84,7 @@ func (tx *TX) Commit(ctx context.Context) error {
 func (tx *TX) Rollback(ctx context.Context) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, txRollbackOperation)
 	defer span.Finish()
-	setDBSpanTags(span, tx.cluster, tx.schema, tx.table, "")
+	setDBSpanTags(span, tx.cluster, tx.schema, "", "")
 
 	return tx.tx.Rollback()
 }

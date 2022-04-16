@@ -1,9 +1,13 @@
 package vsql
 
 import (
+	"errors"
+	"github.com/apolloconfig/agollo/v4/storage"
 	"github.com/opentracing/opentracing-go"
-	"github.com/xwb1989/sqlparser"
+	"github.com/pingcap/parser"
+	"github.com/pingcap/parser/ast"
 	"strings"
+	"vtool/vconfig"
 	"vtool/vtrace"
 )
 
@@ -20,6 +24,47 @@ const (
 	comma = ","
 )
 
+type ChangeType int64
+
+const (
+	Reopen ChangeType = 1
+	Close  ChangeType = 2
+	Reset  ChangeType = 3
+)
+
+type DBConfig struct {
+	// cluster to db config
+	Conf map[string]InstanceConfig `json:"conf" properties:"conf"`
+}
+
+type InstanceConfig struct {
+	DBName       string `json:"db_name" properties:"db_name"`
+	Host         string `json:"host" properties:"host"`
+	Timeout      int64  `json:"timeout" properties:"timeout"`
+	ReadTimeout  int64  `json:"read_timeout" properties:"read_timeout"`
+	WriteTimeout int64  `json:"write_timeout" properties:"write_timeout"`
+	MaxLifeTime  int64  `json:"max_life_time" properties:"max_life_time"`
+	MaxIdleConn  int    `json:"max_idle_conn" properties:"max_idle_conn"`
+	MaxOpenConn  int    `json:"max_open_conn" properties:"max_open_conn"`
+	Username     string `json:"username" properties:"username"`
+	Password     string `json:"password" properties:"password"`
+}
+
+func (ic InstanceConfig) buildInsCfgKey() string {
+	return strings.Join([]string{ic.Host, ic.Username, ic.Password}, comma)
+}
+
+var (
+	parserIns *parser.Parser
+
+	NotInitManager  = errors.New("NotInitManager")
+	NotFoundCluster = errors.New("NotFoundCluster")
+)
+
+func init() {
+	parserIns = parser.New()
+}
+
 func setDBSpanTags(span opentracing.Span, cluster, schema, table, query string) {
 	span.SetTag(vtrace.Cluster, cluster)
 	span.SetTag(vtrace.Schema, schema)
@@ -30,31 +75,47 @@ func setDBSpanTags(span opentracing.Span, cluster, schema, table, query string) 
 	span.SetTag(vtrace.SpanKind, vtrace.SpanKindSQL)
 }
 
-func parseTable(query string) string {
+type TableVisitor struct {
+	table []string
+}
 
-	stem, err := sqlparser.Parse(query)
+func (t *TableVisitor) Enter(n ast.Node) (node ast.Node, skipChildren bool) {
+	switch nn := n.(type) {
+	case *ast.TableName:
+		t.table = append(t.table, nn.Name.String())
+	}
+	return n, false
+}
+
+func (t *TableVisitor) Leave(n ast.Node) (node ast.Node, ok bool) {
+	return n, true
+}
+
+func (t *TableVisitor) Table() []string {
+	return t.table
+}
+
+func parseTable(sql string) string {
+	stmt, err := parserIns.ParseOneStmt(sql, "", "")
 	if err != nil {
 		return ""
 	}
+	v := &TableVisitor{}
+	stmt.Accept(v)
+	return strings.Join(v.Table(), comma)
+}
 
-	switch node := stem.(type) {
-	case *sqlparser.Select:
-		tables := []string{}
-		for _, from := range node.From {
-			switch from := from.(type) {
-			case *sqlparser.AliasedTableExpr:
-				tables = append(tables, from.Expr.(sqlparser.TableName).Name.String())
-			}
-		}
-		return strings.Join(tables, comma)
-	case *sqlparser.Insert:
-		return node.Table.Name.String()
-	case *sqlparser.Update:
-		return node.TableExprs[0].(*sqlparser.AliasedTableExpr).Expr.(sqlparser.TableName).Name.String()
-	case *sqlparser.Delete:
-		return node.TableExprs[0].(*sqlparser.AliasedTableExpr).Expr.(sqlparser.TableName).Name.String()
-	default:
-		return ""
+type MysqlListener struct {
+	Change func()
+}
+
+func (cl *MysqlListener) OnChange(event *storage.ChangeEvent) {
+
+}
+
+func (cl *MysqlListener) OnNewestChange(event *storage.FullChangeEvent) {
+	if event.Namespace != vconfig.ServerDB {
+		return
 	}
-
+	cl.Change()
 }
