@@ -9,9 +9,12 @@ import (
 	common2 "vtool/vservice/client/common"
 	"vtool/vservice/common"
 	"vtool/vservice/server"
-	"vtool/vservice/test/grpc"
-	testService "vtool/vservice/test/grpc/grpc_protocol"
 	. "vtool/vservice/test/thrift/thrift_protocol/gen-go/testService"
+	"vtool/vsql"
+)
+
+const (
+	cluster = "censor"
 )
 
 type helloServiceHandler struct {
@@ -24,10 +27,18 @@ func (h *helloServiceHandler) SayHello(req *SayHelloReq, tctx *thriftBase.Contex
 		defer span.Finish()
 	}
 
-	res := grpc.SayHello(ctx, &testService.SayHelloReq{HelloType: 1})
+	db, err := vsql.GetDB(cluster)
+	if err != nil {
+		return nil, fmt.Errorf("get db failed %s", err.Error())
+	}
+
+	_, err = db.ExecContext(ctx, "insert into test_table(name) values(?)", "test")
+	if err != nil {
+		return nil, fmt.Errorf("get db failed %s", err.Error())
+	}
 
 	return &SayHelloRes{
-		Data: &SayHelloData{Val: "this is thrift val" + fmt.Sprintf("%+v", res)},
+		Data: &SayHelloData{Val: "this is thrift val"},
 	}, nil
 }
 
@@ -49,6 +60,10 @@ func TestThriftServer(t *testing.T) {
 
 }
 
-func TestNewThriftClient(t *testing.T) {
-	fmt.Println(SayHello(context.Background(), &SayHelloReq{}))
+func TestNewGrpcClient(t *testing.T) {
+	ctx := context.Background()
+
+	fmt.Println(SayHello(ctx, &SayHelloReq{}))
+
+	// time.Sleep(time.Hour)
 }

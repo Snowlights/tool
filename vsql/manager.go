@@ -152,6 +152,7 @@ func (m *Manager) getInstance(cluster string) (*Instance, error) {
 		return ins, nil
 	}
 
+	m.insMu.RUnlock()
 	m.insMu.Lock()
 	defer m.insMu.Unlock()
 

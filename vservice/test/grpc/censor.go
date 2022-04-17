@@ -17,7 +17,7 @@ func init() {
 		RegistrationType: common.ETCD,
 		Cluster:          []string{"127.0.0.1:2379"},
 		ServGroup:        "base/talent",
-		ServName:         "talent",
+		ServName:         "censor",
 	})
 
 	servCli := func(conn *grpc.ClientConn) interface{} {

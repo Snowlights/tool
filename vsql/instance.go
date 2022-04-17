@@ -3,6 +3,7 @@ package vsql
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"time"
 )
 
