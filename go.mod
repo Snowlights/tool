@@ -8,6 +8,7 @@ require (
 	github.com/Snowlights/gogrpc v0.0.0-20220317041425-3788e34bdf78
 	github.com/apolloconfig/agollo/v4 v4.1.0
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0

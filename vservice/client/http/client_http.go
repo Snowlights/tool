@@ -7,11 +7,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"vtool/vlog"
 	clientCommon "vtool/vservice/client/common"
 	"vtool/vservice/common"
+	"vtool/vtrace"
 )
-
-// todo client lookup
 
 type HttpClient struct {
 	client common.Client
@@ -72,6 +72,11 @@ func (hc HttpClient) do(serv *common.ServiceInfo, option *common.HttpCallerOptio
 	time.AfterFunc(timeout, func() {
 		cancel()
 	})
+	err = vtrace.TraceHTTPRequest(ctx, request)
+	if err != nil {
+		vlog.ErrorF(ctx, "HttpClient.do trace http request error: %v", err)
+		err = nil
+	}
 	request = request.WithContext(ctx)
 
 	response, err := common.DefaultHttpClient.Do(request)

@@ -30,7 +30,6 @@ func GetDB(cluster string) (*DB, error) {
 
 func InitManager(center vconfig.Center) (*Manager, error) {
 
-	// todo init with config
 	manager := &Manager{
 		insMap: make(map[string]*Instance),
 		center: center,
@@ -132,7 +131,6 @@ func (m *Manager) getDB(cluster string) (*DB, error) {
 		return nil, err
 	}
 
-	// todo: get instance and return
 	return &DB{
 		db:      ins.db,
 		cluster: cluster,

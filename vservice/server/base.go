@@ -23,7 +23,6 @@ import (
 type ServiceBase struct {
 	center vconfig.Center
 
-	// todo add db open api
 	// todo add redis open api
 	// todo add mq open api
 
