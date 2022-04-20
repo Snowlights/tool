@@ -32,12 +32,18 @@ func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*
 		return nil, fmt.Errorf("get db failed %s", err.Error())
 	}
 
-	_, err = db.ExecContext(ctx, "insert into test_table(id, name) values(?, ?)", 1, "test")
+	_, err = db.ExecContext(ctx, "insert into test_table(name) values(?)",  "test")
 	if err != nil {
 		return nil, fmt.Errorf("get db failed %s", err.Error())
 	}
 
-	vlog.ErrorF(ctx, "grpc say hello req is %+v", req)
+	redisCli := server.GetServBase().GetRedisClient(ctx)
+	cmd := redisCli.Set(ctx, "test", "test", 0)
+	res, err := cmd.Result()
+	if err != nil {
+		return nil, fmt.Errorf("get db failed %s", err.Error())
+	}
+	vlog.ErrorF(ctx, "grpc say hello req is %+v, redis res is %+v", req, res)
 
 	return &SayHelloRes{
 		Data: &SayHelloData{Val: "this is grpc val"},
