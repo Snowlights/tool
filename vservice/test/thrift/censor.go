@@ -7,7 +7,7 @@ import (
 	"time"
 	"vtool/idl/thrift/gen-go/thriftBase"
 	clientCommon "vtool/vservice/client/common"
-	clientThrift "vtool/vservice/client/rpc_client"
+	"vtool/vservice/client/rpc_client"
 	"vtool/vservice/common"
 	. "vtool/vservice/test/thrift/thrift_protocol/gen-go/testService"
 )
@@ -24,7 +24,7 @@ func init() {
 		return NewTestServiceClientFactory(t, tp)
 	}
 
-	thriftClient = clientThrift.NewRpcClient(client, servCli, nil)
+	thriftClient = rpc_client.NewRpcClient(client, servCli, nil)
 }
 
 var thriftClient common.RpcClient

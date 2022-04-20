@@ -8,6 +8,11 @@ import (
 	"vtool/vservice/common"
 	"vtool/vservice/server"
 	. "vtool/vservice/test/grpc/grpc_protocol"
+	"vtool/vsql"
+)
+
+const (
+	cluster = "censor"
 )
 
 type helloServiceHandler struct{}
@@ -21,8 +26,24 @@ func (h *helloServiceHandler) SayHello(ctx context.Context, req *SayHelloReq) (*
 	//}, nil
 
 	// res := thrift.SayHello(ctx, &testService.SayHelloReq{Val: 1})
+	//
+	db, err := vsql.GetDB(cluster)
+	if err != nil {
+		return nil, fmt.Errorf("get db failed %s", err.Error())
+	}
 
-	vlog.ErrorF(ctx, "grpc say hello req is %+v", req)
+	_, err = db.ExecContext(ctx, "insert into test_table(name) values(?)",  "test")
+	if err != nil {
+		return nil, fmt.Errorf("get db failed %s", err.Error())
+	}
+
+	redisCli := server.GetServBase().GetRedisClient(ctx)
+	cmd := redisCli.Set(ctx, "test", "test", 0)
+	res, err := cmd.Result()
+	if err != nil {
+		return nil, fmt.Errorf("get db failed %s", err.Error())
+	}
+	vlog.ErrorF(ctx, "grpc say hello req is %+v, redis res is %+v", req, res)
 
 	return &SayHelloRes{
 		Data: &SayHelloData{Val: "this is grpc val"},

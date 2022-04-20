@@ -1,6 +1,6 @@
 module vtool
 
-go 1.15
+go 1.16
 
 require (
 	git.apache.org/thrift.git v0.0.0-20150427210205-dc799ca07862
@@ -8,11 +8,15 @@ require (
 	github.com/Snowlights/gogrpc v0.0.0-20220317041425-3788e34bdf78
 	github.com/apolloconfig/agollo/v4 v4.1.0
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-redis/redis v6.15.9+incompatible // indirect
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hashicorp/consul/api v1.12.0
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
+	github.com/pingcap/parser v0.0.0-20200623164729-3a18f1e5dceb
+	github.com/pingcap/tidb v1.1.0-beta.0.20200630082100-328b6d0a955c
 	github.com/prometheus/client_golang v1.12.1
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
 	github.com/shirou/gopsutil v2.21.11+incompatible

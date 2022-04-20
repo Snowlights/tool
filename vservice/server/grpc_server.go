@@ -12,6 +12,7 @@ import (
 	"time"
 	"vtool/vprometheus/metric"
 	"vtool/vservice/common"
+	"vtool/vtrace"
 )
 
 func NewGrpcServerWithInterceptor() *grpc.Server {
@@ -57,12 +58,12 @@ func SpanDecorator(ctx context.Context,
 	if servBase != nil {
 		servInfo := servBase.ServInfo()
 		if servInfo != nil {
-			span.SetTag("lane", servInfo.Lane)
-			span.SetTag("servType", common.Grpc)
+			span.SetTag(vtrace.Lane, servInfo.Lane)
+			span.SetTag(vtrace.ServType, common.Grpc)
 			serv, ok := servInfo.ServList[common.Grpc]
 			if ok {
-				span.SetTag("servIp", serv.Addr)
-				span.SetTag("engineType", serv.Type)
+				span.SetTag(vtrace.ServIP, serv.Addr)
+				span.SetTag(vtrace.EngineType, serv.Type)
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"vtool/cache/vredis"
 	"vtool/vconfig"
 )
 
@@ -34,6 +35,7 @@ type ServerBase interface {
 	Stop()
 
 	GetCenter(ctx context.Context) vconfig.Center
+	GetRedisClient(ctx context.Context) *vredis.RedisClient
 
 	// todo service region
 	// eg: beijing、hangzhou、shanghai

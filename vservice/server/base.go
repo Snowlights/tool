@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"strconv"
 	"time"
+	"vtool/cache/vredis"
 	"vtool/parse"
 	"vtool/vconfig"
 	"vtool/vlog"
@@ -16,14 +17,14 @@ import (
 	"vtool/vservice/server/engine"
 	"vtool/vservice/server/register"
 	"vtool/vservice/server/register/consul"
+	"vtool/vsql"
 	"vtool/vtrace"
 )
 
 type ServiceBase struct {
 	center vconfig.Center
 
-	// todo add db open api
-	// todo add redis open api
+	redisClient *vredis.RedisClient
 	// todo add mq open api
 
 	// todo: log log time, add region and cross region and colony config
@@ -69,6 +70,17 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 		return nil, err
 	}
 
+	_, err = vsql.InitManager(servBase.center)
+	if err != nil {
+		return nil, err
+	}
+
+	err = servBase.initRedis(ctx)
+	if err != nil {
+		vlog.ErrorF(ctx, "init redis error: %v", err)
+		err = nil
+	}
+
 	err = servBase.initRegisterEngines()
 	if err != nil {
 		return nil, err
@@ -81,6 +93,10 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 
 func (sb *ServiceBase) GetCenter(ctx context.Context) vconfig.Center {
 	return sb.center
+}
+
+func (sb *ServiceBase) GetRedisClient(ctx context.Context) *vredis.RedisClient {
+	return sb.redisClient
 }
 
 func (sb *ServiceBase) Register(ctx context.Context, props map[common.ServiceType]common.Processor) error {
@@ -141,6 +157,21 @@ func (sb *ServiceBase) Stop() {
 		vtrace.GlobalTracer.Close()
 	}
 
+}
+
+func (sb *ServiceBase) initRedis(ctx context.Context) error {
+	redisConfig := new(vredis.RedisConfig)
+	err := sb.center.UnmarshalWithNameSpace(vconfig.Redis, parse.PropertiesTagName, redisConfig)
+	if err != nil {
+		return err
+	}
+
+	redisClient, err := vredis.NewRedisClient(ctx, redisConfig)
+	if err != nil {
+		return err
+	}
+	sb.redisClient = redisClient
+	return nil
 }
 
 func (sb *ServiceBase) initRegisterEngines() error {
@@ -211,7 +242,7 @@ func (sb *ServiceBase) parseConfigEnv(args *servArgs) (*vconfig.CenterConfig, er
 		AppID:   args.serviceGroup + common.Slash + args.serviceName,
 		Cluster: centerConfig.Cluster,
 		// todo db、mq、redis config
-		Namespace:        []string{vconfig.Application, vconfig.Server},
+		Namespace:        []string{vconfig.Application, vconfig.Server, vconfig.ServerDB},
 		IP:               centerConfig.IP,
 		Port:             int(port),
 		IsBackupConfig:   centerConfig.IsBackupConfig,
