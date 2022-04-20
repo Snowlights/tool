@@ -65,6 +65,7 @@ const (
 
 	RedisCluster = "cluster"
 	RedisCmd     = "cmd"
+	WithPipeline = "withPipeline"
 )
 
 func buildServSamplerTypeKey(servName string) string {

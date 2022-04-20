@@ -4,20 +4,43 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis"
+	"os"
 	"strings"
+	"vtool/cache/vredis/pipeline"
 	"vtool/vlog"
 	"vtool/vtrace"
 )
 
 type RedisConfig struct {
-	Host string
-	Auth string
-	Db   int
+	Host string `json:"host" properties:"host"`
+	Auth string `json:"auth" properties:"auth"`
+	Db   int    `json:"db" properties:"db"`
 }
 
 type RedisClient struct {
 	config *RedisConfig
 	client *redis.Client
+}
+
+const (
+	RedisHost = "REDIS_HOST"
+	RedisAuth = "REDIS_AUTH"
+)
+
+func init() {
+	host, ok := os.LookupEnv(RedisHost)
+	if !ok {
+		return
+	}
+	auth, ok := os.LookupEnv(RedisAuth)
+	if !ok {
+		return
+	}
+	config := &RedisConfig{
+		Host: host,
+		Auth: auth,
+	}
+	DefaultRedisClient, _ = NewRedisClient(context.Background(), config)
 }
 
 var DefaultRedisClient *RedisClient
@@ -61,6 +84,24 @@ func (c *RedisClient) setSpan(ctx context.Context, cmd redis.Cmder) {
 	}
 }
 
+func (c *RedisClient) Select(ctx context.Context, db int) *redis.Cmd {
+	cmd := c.client.Do("SELECT", db)
+	c.setSpan(ctx, cmd)
+	return cmd
+}
+
+func (c *RedisClient) Echo(ctx context.Context, message interface{}) *redis.Cmd {
+	cmd := c.client.Do("ECHO", message)
+	c.setSpan(ctx, cmd)
+	return cmd
+}
+
 func (c *RedisClient) Close() error {
 	return c.client.Close()
+}
+
+func (c *RedisClient) Pipeline() *pipeline.Pipeline {
+	return &pipeline.Pipeline{
+		Pipe: c.client.Pipeline(),
+	}
 }
