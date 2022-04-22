@@ -27,6 +27,7 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.2
+	go.mongodb.org/mongo-driver v1.9.0 // indirect
 	go.uber.org/zap v1.21.0
 	golang.org/x/sys v0.0.0-20220325203850-36772127a21f // indirect
 	google.golang.org/grpc v1.45.0

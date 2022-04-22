@@ -2,7 +2,9 @@ package vredis
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 )
 
 func TestRedisClient_Set(t *testing.T) {
@@ -19,13 +21,17 @@ func TestRedisClient_Set(t *testing.T) {
 		return
 	}
 
-	cmd := client.Set(ctx, "test", "test", 0)
+	cmd := client.Set(ctx, "test", true, time.Second*10)
 	res, err := cmd.Result()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	t.Log(res)
+
+	time.Sleep(time.Second * 12)
+	r, err := client.Get(ctx, "test").Result()
+	fmt.Println("r is ", r, " err is ", err)
 }
 
 func TestNewRedisClient(t *testing.T) {
