@@ -26,7 +26,7 @@ type MongoClient struct {
 
 func (m *MongoClient) Connect(ctx context.Context) (*mongo.Client, error) {
 
-	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:40000"))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (m *MongoClient) Connect(ctx context.Context) (*mongo.Client, error) {
 
 func (m *MongoClient) ConnectWithAuth(ctx context.Context) (*mongo.Client, error) {
 
-	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://user:pwd1@localhost:40000"))
 	if err != nil {
 		return nil, err
 	}
