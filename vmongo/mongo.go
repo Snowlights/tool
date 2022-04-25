@@ -7,17 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoHost struct {
-	Host string
-	Port int
-}
-
-type MongoConfig struct {
-	Hosts    []MongoHost
-	UserName string
-	Password string
-}
-
 type MongoClient struct {
 	client *mongo.Client
 }
