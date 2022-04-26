@@ -61,3 +61,34 @@ func TestNewMongo(t *testing.T) {
 
 	return
 }
+
+func TestNewConf(t *testing.T) {
+	ctx := context.Background()
+	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:40000").SetAuth(options.Credential{
+		Username: "user1",
+		Password: "pwd1",
+	}).SetMaxPoolSize(uint64(20)))
+	if err != nil {
+		return
+	}
+	defer mongoCli.Disconnect(ctx)
+
+	// collection := mongoCli.Database("test").Collection("test")
+
+	// transaction
+	//session, err := mongoCli.StartSession()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//session.
+	collection := mongoCli.Database("test").Collection("col")
+
+	cur, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return
+	}
+
+	var res []interface{}
+	cur.All(ctx, &res)
+	fmt.Println(res)
+}

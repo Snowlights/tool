@@ -2,56 +2,29 @@ package vmongo
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"sync"
+	"vtool/vconfig"
 )
 
-type MongoClient struct {
-	client *mongo.Client
+type Manager struct {
+	insMu sync.RWMutex
+
+	// cluster to db instance
+	insMap map[string]*Instance
+
+	center vconfig.Center
+	cMu    sync.RWMutex
+	cfg    *MongoConfig
 }
 
 // Collection is a handle to a MongoDB collection. It is safe for concurrent use by multiple goroutines.
 
-func (m *MongoClient) Connect(ctx context.Context) (*mongo.Client, error) {
-
-	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:40000"))
-	if err != nil {
-		return nil, err
-	}
-	defer mongoCli.Disconnect(ctx)
-
-	// collection := mongoCli.Database("test").Collection("test")
-
-	return mongoCli, nil
+func (m *Manager) Exec(ctx context.Context) error {
+	return nil
 }
 
-func (m *MongoClient) ConnectWithAuth(ctx context.Context) (*mongo.Client, error) {
+func (m *Manager) getInstance(ctx context.Context) (*mongo.Client, error) {
 
-	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://user:pwd1@localhost:40000"))
-	if err != nil {
-		return nil, err
-	}
-
-	defer mongoCli.Disconnect(ctx)
-
-	// collection := mongoCli.Database("test").Collection("test")
-
-	// transaction
-	//session, err := mongoCli.StartSession()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//session.
-
-	collection := mongoCli.Database("test").Collection("test")
-
-	cur, err := collection.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-
-	cur.All(ctx, &[]interface{}{})
-
-	return mongoCli, nil
+	return nil, nil
 }
