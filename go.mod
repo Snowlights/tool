@@ -1,6 +1,6 @@
 module vtool
 
-go 1.15
+go 1.16
 
 require (
 	git.apache.org/thrift.git v0.0.0-20150427210205-dc799ca07862
