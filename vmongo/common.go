@@ -1,9 +1,17 @@
 package vmongo
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
 const (
 	comma = ","
+)
+
+var (
+	NotInitManager  = errors.New("NotInitManager")
+	NotFoundCluster = errors.New("NotFoundCluster")
 )
 
 type MongoConfig struct {

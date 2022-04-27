@@ -68,6 +68,15 @@ const (
 	WithPipeline = "withPipeline"
 )
 
+const (
+	ComponentMongo = "mongo"
+	SpanKindMongo  = "client"
+
+	MongoCluster = "mongoCluster"
+	DataBase     = "dataBase"
+	Collection   = "collection"
+)
+
 func buildServSamplerTypeKey(servName string) string {
 	return servSamplerTypePrefix + servName
 }

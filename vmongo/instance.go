@@ -4,6 +4,8 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 	"time"
 )
 
@@ -61,7 +63,10 @@ func (i *Instance) initClient() error {
 	mongoCli, err := mongo.Connect(ctx, options.Client().ApplyURI(i.host).SetAuth(options.Credential{
 		Username: i.username,
 		Password: i.password}).
-		SetMaxPoolSize(uint64(i.poolSize)))
+		SetMaxPoolSize(uint64(i.poolSize)).SetConnectTimeout(i.timeout).
+		SetReadConcern(readconcern.Majority()).
+		SetWriteConcern(writeconcern.New(writeconcern.WTimeout(i.writeTimeout))).
+		SetReadPreference(ReadPrefPrimaryPreferred()))
 	if err != nil {
 		return err
 	}
