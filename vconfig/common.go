@@ -15,6 +15,7 @@ const (
 	Server   = "server"
 	ServerDB = "mysql"
 	Redis    = "redis"
+	Mongo    = "mongo"
 
 	// client config
 	Client = "client"
