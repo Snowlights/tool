@@ -76,6 +76,15 @@ func (m *Manager) Exec(ctx context.Context, cluster, database, collection string
 	return m.exec(ctx, cluster, database, collection, query, readPref, readConcern, writeConcern)
 }
 
+func (m *Manager) Close() {
+	m.insMu.Lock()
+	defer m.insMu.Unlock()
+
+	for _, ins := range m.insMap {
+		ins.Close()
+	}
+}
+
 func (m *Manager) exec(ctx context.Context, cluster, database, collection string, query func(c *mongo.Collection) error,
 	readPref *readpref.ReadPref, readConcern *readconcern.ReadConcern,
 	writeConcern *writeconcern.WriteConcern) error {
