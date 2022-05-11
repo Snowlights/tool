@@ -12,14 +12,14 @@ type Writer struct {
 }
 
 func NewKafkaWriter(ctx context.Context, brokers []string, topic string) *Writer {
-	config := kafka.WriterConfig{
-		Brokers:     brokers,
+	writer := &kafka.Writer{
+		Addr:        kafka.TCP(brokers...),
 		Topic:       topic,
 		Balancer:    &kafka.Hash{},
 		Logger:      getInfoLogger(),
 		ErrorLogger: getErrorLogger(),
 	}
-	writer := kafka.NewWriter(config)
+
 	kafkaWriter := &Writer{
 		Writer: writer,
 		topic:  topic,
