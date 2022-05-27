@@ -12,6 +12,7 @@ import (
 	"vtool/vconfig"
 	"vtool/vlog"
 	"vtool/vmongo"
+	"vtool/vmq"
 	"vtool/vprometheus/metric"
 	"vtool/vprometheus/vcollector"
 	"vtool/vservice/common"
@@ -28,6 +29,7 @@ type ServiceBase struct {
 	// todo: redis can refactor like mongo and vsql
 	redisClient  *vredis.RedisClient
 	mongoManager *vmongo.Manager
+	mqManager    *vmq.Manager
 	// todo add mq open api
 
 	// todo: log log time, add region and cross region and colony config
@@ -81,6 +83,12 @@ func NewServiceBase(ctx context.Context, args *servArgs) (*ServiceBase, error) {
 	err = servBase.initRedis(ctx)
 	if err != nil {
 		vlog.ErrorF(ctx, "init redis error: %v", err)
+		err = nil
+	}
+
+	err = servBase.initMQ(ctx)
+	if err != nil {
+		vlog.ErrorF(ctx, "init mq error: %v", err)
 		err = nil
 	}
 
@@ -166,6 +174,10 @@ func (sb *ServiceBase) Stop() {
 		sb.mongoManager.Close()
 	}
 
+	if sb.mqManager != nil {
+		sb.mqManager.Close()
+	}
+
 	if vtrace.GlobalTracer != nil {
 		vtrace.GlobalTracer.Close()
 	}
@@ -194,6 +206,16 @@ func (sb *ServiceBase) initMongo(ctx context.Context) error {
 		return err
 	}
 	sb.mongoManager = mongoManager
+	return nil
+}
+
+func (sb *ServiceBase) initMQ(ctx context.Context) error {
+
+	mqManager, err := vmq.NewManager(sb.center)
+	if err != nil {
+		return err
+	}
+	sb.mqManager = mqManager
 	return nil
 }
 

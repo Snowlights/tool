@@ -1,25 +1,31 @@
 package vmq
 
-func ReadMsgWithTopic(cluster, topic string, ov interface{}) error {
+import (
+	"context"
+	"github.com/segmentio/kafka-go"
+)
 
-	return nil
+func ReadMsgWithTopicGroup(ctx context.Context, cluster, topic, group string, ov interface{}) error {
+	return defaultManager.ReadMsg(ctx, cluster, topic, group, 0, ov)
 }
 
 func ReadMsgWithTopicAndPartition(cluster, topic string, partition int, ov interface{}) error {
+	return defaultManager.ReadMsg(context.Background(), cluster, topic, "", partition, ov)
+}
+
+func FetchMsgWithTopicGroup(cluster, topic, group string, ov interface{}) (Handler, error) {
+	return defaultManager.FetchMsg(context.Background(), cluster, topic, group, 0, ov)
+}
+
+func FetchMsgWithTopicAndPartition(cluster, topic string, partition int, ov interface{}) (Handler, error) {
+	return defaultManager.FetchMsg(context.Background(), cluster, topic, "", partition, ov)
+}
+
+func WriteMsgWithTopic(cluster, topic string, k string, v interface{}) error {
 
 	return nil
 }
 
-func FetchMsgWithTopic(cluster, topic string, partition int, ov interface{}) error {
-
-	return nil
-}
-
-func FetchMsgWithTopicAndPartition(cluster, topic string, partition int, ov interface{}) error {
-
-	return nil
-}
-
-func WriteMsgWithTopic(cluster, topic string, msgs ...Message) error {
+func WriteMsgsWithTopic(cluster, topic string, msgs ...kafka.Message) error {
 	return nil
 }

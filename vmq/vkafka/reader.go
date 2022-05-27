@@ -2,8 +2,8 @@ package vkafka
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/segmentio/kafka-go"
+	"strings"
 )
 
 type Reader struct {
@@ -32,28 +32,27 @@ func NewKafkaReader(insConf *KafkaReaderConf) *Reader {
 	return kafkaReader
 }
 
-func (m *Reader) ReadMsg(ctx context.Context, ov interface{}) error {
-	msg, err := m.ReadMessage(ctx)
+func (r *Reader) ReadMsg(ctx context.Context) (kafka.Message, error) {
+	msg, err := r.ReadMessage(ctx)
 	if err != nil {
-		return err
+		return kafka.Message{}, err
 	}
 
-	err = json.Unmarshal(msg.Value, ov)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return msg, nil
 }
 
-func (m *Reader) FetchMessage(ctx context.Context) (kafka.Message, error) {
-	return m.Reader.FetchMessage(ctx)
+func (r *Reader) FetchMessage(ctx context.Context) (kafka.Message, error) {
+	return r.Reader.FetchMessage(ctx)
 }
 
-func (m *Reader) Commit(ctx context.Context, msg ...kafka.Message) error {
-	return m.Reader.CommitMessages(ctx, msg...)
+func (r *Reader) Commit(ctx context.Context, msg ...kafka.Message) error {
+	return r.Reader.CommitMessages(ctx, msg...)
 }
 
-func (m *Reader) Close() error {
-	return m.Reader.Close()
+func (r *Reader) Cluster() string {
+	return strings.Join(r.conf.Brokers, ",")
+}
+
+func (r *Reader) Close() error {
+	return r.Reader.Close()
 }

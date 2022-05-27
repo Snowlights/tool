@@ -6,11 +6,6 @@ import (
 	"strings"
 )
 
-type Message struct {
-	key string
-	val interface{}
-}
-
 type RoleType int
 
 const (
@@ -18,6 +13,12 @@ const (
 	RoleTypeKafkaWriter
 
 	confStrSep = "@"
+)
+
+const (
+	WriteMsg = "WriteMsg"
+	ReadMsg  = "ReadMsg"
+	FetchMsg = "FetchMsg"
 )
 
 type KafkaConf struct {

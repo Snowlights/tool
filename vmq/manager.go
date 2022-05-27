@@ -2,14 +2,18 @@ package vmq
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/apolloconfig/agollo/v4/storage"
+	"github.com/opentracing/opentracing-go"
+	"github.com/segmentio/kafka-go"
 	"sync"
 	"time"
 	"vtool/parse"
 	"vtool/vconfig"
 	"vtool/vlog"
 	"vtool/vmq/vkafka"
+	"vtool/vtrace"
 )
 
 var defaultManager *Manager
@@ -35,6 +39,140 @@ func NewManager(center vconfig.Center) (*Manager, error) {
 	manager.center.AddListener(&KafkaListener{manager.changeEvent})
 	defaultManager = manager
 	return defaultManager, nil
+}
+
+func (m *Manager) ReadMsg(ctx context.Context, cluster, topic, group string, partition int, v interface{}) error {
+	conf := &Conf{
+		cluster:   cluster,
+		topic:     topic,
+		group:     group,
+		partition: partition,
+		role:      RoleTypeKafkaReader,
+	}
+	reader := m.getKafkaReader(context.Background(), conf)
+	if reader == nil {
+		return fmt.Errorf("get reader failed, cluster: %s, topic: %s, group: %s, partition: %d", cluster, topic, group, partition)
+	}
+
+	msg, err := reader.ReadMsg(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(msg.Value, v)
+	if err != nil {
+		return err
+	}
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, ReadMsg)
+	defer span.Finish()
+	span.SetTag(vtrace.KafkaRole, RoleTypeKafkaReader)
+	span.SetTag(vtrace.KafkaCluster, reader.Cluster())
+	span.SetTag(vtrace.KafkaTopic, conf.topic)
+	span.SetTag(vtrace.KafkaPartition, conf.partition)
+	span.SetTag(vtrace.KafkaMsg, msg)
+	span.SetTag(vtrace.Component, vtrace.ComponentKafka)
+	span.SetTag(vtrace.SpanKind, vtrace.SpanKindKafka)
+
+	return nil
+}
+
+func (m *Manager) FetchMsg(ctx context.Context, cluster, topic, group string, partition int, v interface{}) (Handler, error) {
+	conf := &Conf{
+		cluster:   cluster,
+		topic:     topic,
+		group:     group,
+		partition: partition,
+		role:      RoleTypeKafkaReader,
+	}
+	reader := m.getKafkaReader(context.Background(), conf)
+	if reader == nil {
+		return nil, fmt.Errorf("get reader failed, cluster: %s, topic: %s, group: %s, partition: %d", cluster, topic, group, partition)
+	}
+
+	msg, err := reader.FetchMessage(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(msg.Value, v)
+	if err != nil {
+		return nil, err
+	}
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, FetchMsg)
+	defer span.Finish()
+	span.SetTag(vtrace.KafkaRole, RoleTypeKafkaReader)
+	span.SetTag(vtrace.KafkaCluster, reader.Cluster())
+	span.SetTag(vtrace.KafkaTopic, conf.topic)
+	span.SetTag(vtrace.KafkaPartition, conf.partition)
+	span.SetTag(vtrace.KafkaMsg, msg)
+	span.SetTag(vtrace.Component, vtrace.ComponentKafka)
+	span.SetTag(vtrace.SpanKind, vtrace.SpanKindKafka)
+
+	return &KafkaHandler{
+		reader: reader,
+		msg:    append([]kafka.Message{}, msg),
+	}, nil
+}
+
+func (m *Manager) WriteMsg(ctx context.Context, cluster, topic, key string, v interface{}) error {
+
+	conf := &Conf{
+		cluster: cluster,
+		topic:   topic,
+		role:    RoleTypeKafkaWriter,
+	}
+	writer := m.getKafkaWriter(ctx, conf)
+	if writer == nil {
+		return fmt.Errorf("get writer failed, cluster: %s, topic: %s", cluster, topic)
+	}
+
+	err := writer.WriteMsg(ctx, key, v)
+	if err != nil {
+		return err
+	}
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, WriteMsg)
+	defer span.Finish()
+	span.SetTag(vtrace.KafkaRole, RoleTypeKafkaWriter)
+	span.SetTag(vtrace.KafkaCluster, writer.Cluster())
+	span.SetTag(vtrace.KafkaTopic, writer.Topic())
+	span.SetTag(vtrace.KafkaPartition, 0)
+	span.SetTag(vtrace.KafkaMsg, fmt.Sprintf("key:%+v value:%+v", key, v))
+	span.SetTag(vtrace.Component, vtrace.ComponentKafka)
+	span.SetTag(vtrace.SpanKind, vtrace.SpanKindKafka)
+
+	return nil
+}
+
+func (m *Manager) WriteMsgs(ctx context.Context, cluster, topic string, msgs ...kafka.Message) error {
+	conf := &Conf{
+		cluster: cluster,
+		topic:   topic,
+		role:    RoleTypeKafkaWriter,
+	}
+	writer := m.getKafkaWriter(ctx, conf)
+	if writer == nil {
+		return fmt.Errorf("get writer failed, cluster: %s, topic: %s", cluster, topic)
+	}
+
+	err := writer.WriteMsgs(ctx, msgs...)
+	if err != nil {
+		return err
+	}
+
+	span, ctx := opentracing.StartSpanFromContext(ctx, WriteMsg)
+	defer span.Finish()
+	span.SetTag(vtrace.KafkaRole, RoleTypeKafkaWriter)
+	span.SetTag(vtrace.KafkaCluster, writer.Cluster())
+	span.SetTag(vtrace.KafkaTopic, writer.Topic())
+	span.SetTag(vtrace.KafkaPartition, 0)
+	span.SetTag(vtrace.KafkaMsg, msgs)
+	span.SetTag(vtrace.Component, vtrace.ComponentKafka)
+	span.SetTag(vtrace.SpanKind, vtrace.SpanKindKafka)
+
+	return nil
 }
 
 func (m *Manager) getKafkaReader(ctx context.Context, conf *Conf) *vkafka.Reader {
@@ -176,4 +314,30 @@ func (cl *KafkaListener) OnNewestChange(event *storage.FullChangeEvent) {
 		return
 	}
 	cl.Change()
+}
+
+type Handler interface {
+	CommitMsg(ctx context.Context) error
+}
+
+type KafkaHandler struct {
+	reader *vkafka.Reader
+	msg    []kafka.Message
+}
+
+func (k *KafkaHandler) CommitMsg(ctx context.Context) error {
+
+	if len(k.msg) > 0 {
+		span, _ := opentracing.StartSpanFromContext(ctx, FetchMsg)
+		defer span.Finish()
+		span.SetTag(vtrace.KafkaRole, RoleTypeKafkaReader)
+		span.SetTag(vtrace.KafkaCluster, k.reader.Cluster())
+		span.SetTag(vtrace.KafkaTopic, k.msg[0].Topic)
+		span.SetTag(vtrace.KafkaPartition, k.msg[0].Topic)
+		span.SetTag(vtrace.KafkaMsg, k.msg)
+		span.SetTag(vtrace.Component, vtrace.ComponentKafka)
+		span.SetTag(vtrace.SpanKind, vtrace.SpanKindKafka)
+	}
+
+	return k.reader.Commit(ctx, k.msg...)
 }
