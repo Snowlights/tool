@@ -8,13 +8,13 @@ import (
 
 type Writer struct {
 	*kafka.Writer
-	topic string
+	conf *KafkaWriterConf
 }
 
-func NewKafkaWriter(ctx context.Context, brokers []string, topic string) *Writer {
+func NewKafkaWriter(insConf *KafkaWriterConf) *Writer {
 	writer := &kafka.Writer{
-		Addr:        kafka.TCP(brokers...),
-		Topic:       topic,
+		Addr:        kafka.TCP(insConf.Brokers...),
+		Topic:       insConf.Topic,
 		Balancer:    &kafka.Hash{},
 		Logger:      getInfoLogger(),
 		ErrorLogger: getErrorLogger(),
@@ -22,7 +22,7 @@ func NewKafkaWriter(ctx context.Context, brokers []string, topic string) *Writer
 
 	kafkaWriter := &Writer{
 		Writer: writer,
-		topic:  topic,
+		conf:   insConf,
 	}
 
 	return kafkaWriter

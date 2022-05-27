@@ -17,7 +17,7 @@ func NewManager() *Manager {
 	}
 }
 
-func WriteMsgWithTopic(topic string, msgs ...Message) error {
+func WriteMsgWithTopic(cluster, topic string, msgs ...Message) error {
 
 	return nil
 }

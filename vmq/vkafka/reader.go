@@ -8,25 +8,25 @@ import (
 
 type Reader struct {
 	*kafka.Reader
-	topic string
+	conf *KafkaReaderConf
 }
 
-func NewKafkaReader(brokers []string, topic, groupId string, partition, minBytes, maxBytes int) *Reader {
+func NewKafkaReader(insConf *KafkaReaderConf) *Reader {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:        brokers,
-		Topic:          topic,
-		GroupID:        groupId,
-		Partition:      partition,
-		MinBytes:       minBytes,
-		MaxBytes:       maxBytes,
-		CommitInterval: 0,
-		StartOffset:    kafka.LastOffset,
+		Brokers:        insConf.Brokers,
+		Topic:          insConf.Topic,
+		GroupID:        insConf.Group,
+		Partition:      insConf.Partition,
+		MinBytes:       insConf.MinByte,
+		MaxBytes:       insConf.MaxByte,
+		CommitInterval: insConf.CommitInterval,
+		StartOffset:    insConf.StartOffset,
 		ErrorLogger:    getErrorLogger(),
 	})
 
 	kafkaReader := &Reader{
 		Reader: reader,
-		topic:  "",
+		conf:   insConf,
 	}
 
 	return kafkaReader
@@ -44,6 +44,10 @@ func (m *Reader) ReadMsg(ctx context.Context, ov interface{}) error {
 	}
 
 	return nil
+}
+
+func (m *Reader) FetchMessage(ctx context.Context) (kafka.Message, error) {
+	return m.Reader.FetchMessage(ctx)
 }
 
 func (m *Reader) Commit(ctx context.Context, msg ...kafka.Message) error {

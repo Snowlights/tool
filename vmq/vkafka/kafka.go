@@ -5,21 +5,32 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 	"vtool/vlog"
 )
 
 const (
 	// REBALANCE_IN_PROGRESS
-	ErrorMsgRebalanceInProgress = "Rebalance In Progress"
+	ErrorMsgReBalanceInProgress = "Rebalance In Progress"
 )
 
-type Kafka struct {
-	brokers []string
-	topic   string
+type KafkaReaderConf struct {
+	Brokers        []string
+	Topic          string
+	Group          string
+	Partition      int
+	CommitInterval time.Duration
+	MinByte        int
+	MaxByte        int
+	StartOffset    int64
 }
 
-type infoLogger struct {
+type KafkaWriterConf struct {
+	Brokers []string
+	Topic   string
 }
+
+type infoLogger struct{}
 
 func getInfoLogger() *infoLogger {
 	return &infoLogger{}
@@ -27,8 +38,7 @@ func getInfoLogger() *infoLogger {
 
 func (i *infoLogger) Printf(format string, v ...interface{}) {
 	errMsg := fmt.Sprintf(format, v...)
-	if strings.Contains(errMsg, ErrorMsgRebalanceInProgress) {
-		log.Println(context.Background(), errMsg)
+	if strings.Contains(errMsg, ErrorMsgReBalanceInProgress) {
 		return
 	}
 	vlog.ErrorF(context.Background(), errMsg)
@@ -43,7 +53,7 @@ func getErrorLogger() *errorLogger {
 
 func (m *errorLogger) Printf(format string, v ...interface{}) {
 	errMsg := fmt.Sprintf(format, v...)
-	if strings.Contains(errMsg, ErrorMsgRebalanceInProgress) {
+	if strings.Contains(errMsg, ErrorMsgReBalanceInProgress) {
 		log.Println(context.Background(), errMsg)
 		return
 	}
