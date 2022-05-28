@@ -77,6 +77,17 @@ const (
 	Collection   = "collection"
 )
 
+const (
+	ComponentKafka = "kafka"
+	SpanKindKafka  = "client"
+
+	KafkaRole      = "role"
+	KafkaCluster   = "cluster"
+	KafkaTopic     = "topic"
+	KafkaPartition = "partition"
+	KafkaMsg       = "msg"
+)
+
 func buildServSamplerTypeKey(servName string) string {
 	return servSamplerTypePrefix + servName
 }
