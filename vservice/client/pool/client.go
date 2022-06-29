@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 	"time"
-	"vtool/vconfig"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type ClientPoolConfig struct {

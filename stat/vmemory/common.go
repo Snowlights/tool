@@ -2,7 +2,7 @@ package vmemory
 
 import (
 	"context"
-	"vtool/vlog"
+	"github.com/Snowlights/tool/vlog"
 )
 
 // calculate current process

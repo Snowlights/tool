@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-	"vtool/vlog"
-	clientCommon "vtool/vservice/client/common"
-	"vtool/vservice/common"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/vlog"
+	clientCommon "github.com/Snowlights/tool/vservice/client/common"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 type HttpClient struct {

@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 	"time"
-	"vtool/parse"
+	"github.com/Snowlights/tool/parse"
 )
 
 func TestParseConfigEnv(t *testing.T) {

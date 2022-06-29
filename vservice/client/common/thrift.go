@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"vtool/idl/thrift/gen-go/thriftBase"
-	"vtool/vservice/common"
-	"vtool/vservice/server"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/idl/thrift/gen-go/thriftBase"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vservice/server"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 const (

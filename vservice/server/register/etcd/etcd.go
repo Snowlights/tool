@@ -2,7 +2,7 @@ package etcd
 
 import (
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 func NewRegister(regConfig *RegisterConfig) (*Register, error) {

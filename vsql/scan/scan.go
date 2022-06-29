@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"reflect"
-	"vtool/parse"
+	"github.com/Snowlights/tool/parse"
 )
 
 const (

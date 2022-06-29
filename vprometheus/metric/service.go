@@ -2,7 +2,7 @@ package metric
 
 import (
 	"time"
-	"vtool/vprometheus/vmetric"
+	"github.com/Snowlights/tool/vprometheus/vmetric"
 )
 
 const (

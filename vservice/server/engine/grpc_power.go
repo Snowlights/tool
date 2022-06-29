@@ -4,9 +4,9 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"time"
-	"vtool/vlog"
-	"vtool/vnet"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vnet"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type GrpcPower struct {

@@ -1,7 +1,7 @@
 namespace go testService
 
 // thrift -I {self location}/tool/idl/thrift
-// -gen go:package_prefix=vtool/idl/thrift/gen-go/ test_server.thrift
+// -gen go:package_prefix=github.com/Snowlights/tool/idl/thrift/gen-go/ test_server.thrift
 include "thrift.thrift"
 
 struct SayHelloReq {

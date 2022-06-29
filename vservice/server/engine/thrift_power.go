@@ -3,9 +3,9 @@ package engine
 import (
 	"context"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"vtool/vlog"
-	"vtool/vnet"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vnet"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type ThriftPower struct {

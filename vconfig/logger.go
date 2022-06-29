@@ -2,7 +2,7 @@ package vconfig
 
 import (
 	"context"
-	"vtool/vlog"
+	"github.com/Snowlights/tool/vlog"
 )
 
 type CenterLogger struct {

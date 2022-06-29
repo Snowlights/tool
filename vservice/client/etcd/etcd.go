@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"vtool/load_balance/consistent"
-	"vtool/vlog"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/load_balance/consistent"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type Client struct {

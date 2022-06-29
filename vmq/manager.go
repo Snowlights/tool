@@ -9,11 +9,11 @@ import (
 	"github.com/segmentio/kafka-go"
 	"sync"
 	"time"
-	"vtool/parse"
-	"vtool/vconfig"
-	"vtool/vlog"
-	"vtool/vmq/vkafka"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/parse"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vmq/vkafka"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 var defaultManager *Manager

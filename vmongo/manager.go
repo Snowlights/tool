@@ -10,9 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 	"sync"
-	"vtool/parse"
-	"vtool/vconfig"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/parse"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 const (

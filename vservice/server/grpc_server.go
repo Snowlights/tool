@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
-	"vtool/vprometheus/metric"
-	"vtool/vservice/common"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/vprometheus/metric"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 func NewGrpcServerWithInterceptor() *grpc.Server {

@@ -19,7 +19,7 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
-	grpcBase "vtool/idl/grpc/grpcBase"
+	grpcBase "github.com/Snowlights/tool/idl/grpc/grpcBase"
 )
 
 const (

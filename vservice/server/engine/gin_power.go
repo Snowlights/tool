@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"vtool/vlog"
-	"vtool/vnet"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vnet"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type GinPower struct {

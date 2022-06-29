@@ -1,6 +1,6 @@
 package metric
 
-import "vtool/vprometheus/vmetric"
+import "github.com/Snowlights/tool/vprometheus/vmetric"
 
 const (
 	serviceNamespace  = "service"
