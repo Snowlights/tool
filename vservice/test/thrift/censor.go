@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/Snowlights/tool/idl/thrift/gen-go/thriftBase"
+	clientCommon "github.com/Snowlights/tool/vservice/client/common"
+	"github.com/Snowlights/tool/vservice/client/rpc_client"
+	"github.com/Snowlights/tool/vservice/common"
+	. "github.com/Snowlights/tool/vservice/test/thrift/thrift_protocol/gen-go/testService"
 	"time"
-	"vtool/idl/thrift/gen-go/thriftBase"
-	clientCommon "vtool/vservice/client/common"
-	"vtool/vservice/client/rpc_client"
-	"vtool/vservice/common"
-	. "vtool/vservice/test/thrift/thrift_protocol/gen-go/testService"
 )
 
 func init() {

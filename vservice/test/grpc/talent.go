@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"time"
-	"vtool/idl/grpc/grpcBase"
-	clientCommon "vtool/vservice/client/common"
-	"vtool/vservice/client/rpc_client"
-	"vtool/vservice/common"
-	. "vtool/vservice/test/grpc/grpc_protocol"
+	"github.com/Snowlights/tool/idl/grpc/grpcBase"
+	clientCommon "github.com/Snowlights/tool/vservice/client/common"
+	"github.com/Snowlights/tool/vservice/client/rpc_client"
+	"github.com/Snowlights/tool/vservice/common"
+	. "github.com/Snowlights/tool/vservice/test/grpc/grpc_protocol"
 )
 
 func init() {

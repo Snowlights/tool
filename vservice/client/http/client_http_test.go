@@ -3,7 +3,7 @@ package http
 import (
 	"fmt"
 	"testing"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 func TestHttpClient_Do(t *testing.T) {

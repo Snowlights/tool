@@ -8,8 +8,8 @@ import (
 	"github.com/pingcap/parser/ast"
 	_ "github.com/pingcap/tidb/types/parser_driver"
 	"strings"
-	"vtool/vconfig"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 const (

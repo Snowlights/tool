@@ -4,7 +4,7 @@
 // 	protoc        v3.8.0
 // source: Grpc.proto
 
-// option go_package = "vtool/idl/grpc/grpcBase";
+// option go_package = "github.com/Snowlights/tool/idl/grpc/grpcBase";
 
 package grpcBase
 

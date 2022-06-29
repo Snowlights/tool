@@ -3,7 +3,7 @@ package vmetric
 import (
 	"context"
 	"github.com/prometheus/client_golang/prometheus"
-	"vtool/vlog"
+	"github.com/Snowlights/tool/vlog"
 )
 
 // avg(http_request_duration_seconds{quantile="0.95"}) // BAD!

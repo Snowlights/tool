@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"vtool/vconfig"
-	"vtool/vlog"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type ConnPool struct {

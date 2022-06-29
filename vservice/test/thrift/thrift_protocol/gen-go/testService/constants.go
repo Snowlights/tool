@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
-	"vtool/idl/thrift/gen-go/thriftBase"
+	"github.com/Snowlights/tool/idl/thrift/gen-go/thriftBase"
 )
 
 // (needed to ensure safety because of naive import list construction.)

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"vtool/vlog"
-	"vtool/vservice/common"
-	"vtool/vservice/server"
-	. "vtool/vservice/test/grpc/grpc_protocol"
-	"vtool/vsql"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vservice/server"
+	. "github.com/Snowlights/tool/vservice/test/grpc/grpc_protocol"
+	"github.com/Snowlights/tool/vsql"
 )
 
 const (

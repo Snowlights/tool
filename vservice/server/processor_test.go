@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 	"time"
-	"vtool/vprometheus/metric"
+	"github.com/Snowlights/tool/vprometheus/metric"
 )
 
 type TestProcessor struct{}

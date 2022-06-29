@@ -1,4 +1,4 @@
-module vtool
+module github.com/Snowlights/tool
 
 go 1.16
 

@@ -11,14 +11,14 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	"vtool/parse"
-	"vtool/vconfig"
-	"vtool/vlog"
-	clientCommon "vtool/vservice/client/common"
-	"vtool/vservice/client/pool"
-	"vtool/vservice/common"
-	"vtool/vservice/server"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/parse"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vlog"
+	clientCommon "github.com/Snowlights/tool/vservice/client/common"
+	"github.com/Snowlights/tool/vservice/client/pool"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vservice/server"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 type RpcClient struct {

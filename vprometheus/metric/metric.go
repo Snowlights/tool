@@ -3,9 +3,9 @@ package metric
 import (
 	"context"
 	"time"
-	"vtool/stat/vcpu"
-	"vtool/stat/vload"
-	"vtool/stat/vmemory"
+	"github.com/Snowlights/tool/stat/vcpu"
+	"github.com/Snowlights/tool/stat/vload"
+	"github.com/Snowlights/tool/stat/vmemory"
 )
 
 const (

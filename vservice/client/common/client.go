@@ -1,12 +1,12 @@
 package common
 
 import (
+	"github.com/Snowlights/tool/vservice/client/etcd"
+	"github.com/Snowlights/tool/vservice/client/zk"
+	"github.com/Snowlights/tool/vservice/common"
 	"math/rand"
 	"strconv"
 	"time"
-	"vtool/vservice/client/etcd"
-	"vtool/vservice/client/zk"
-	"vtool/vservice/common"
 )
 
 func NewClientWithClientConfig(cliConfig *common.ClientConfig) (common.Client, error) {

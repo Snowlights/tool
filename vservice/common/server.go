@@ -2,14 +2,14 @@ package common
 
 import (
 	"context"
-	"vtool/cache/vredis"
-	"vtool/vconfig"
+	"github.com/Snowlights/tool/cache/vredis"
+	"github.com/Snowlights/tool/vconfig"
 )
 
 const (
 	ServWeight = 100
 
-	ContentKey = "vtool.content"
+	ContentKey = "github.com/Snowlights/tool.content"
 )
 
 type RegisterServiceInfo struct {

@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"vtool/vlog"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 type Register struct {

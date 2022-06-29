@@ -3,14 +3,14 @@ package thrift
 import (
 	"context"
 	"fmt"
+	"github.com/Snowlights/tool/idl/thrift/gen-go/thriftBase"
+	common2 "github.com/Snowlights/tool/vservice/client/common"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vservice/server"
+	. "github.com/Snowlights/tool/vservice/test/thrift/thrift_protocol/gen-go/testService"
+	"github.com/Snowlights/tool/vsql"
 	"github.com/opentracing/opentracing-go"
 	"testing"
-	"vtool/idl/thrift/gen-go/thriftBase"
-	common2 "vtool/vservice/client/common"
-	"vtool/vservice/common"
-	"vtool/vservice/server"
-	. "vtool/vservice/test/thrift/thrift_protocol/gen-go/testService"
-	"vtool/vsql"
 )
 
 const (

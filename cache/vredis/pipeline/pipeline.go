@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"strings"
-	"vtool/vtrace"
+	"github.com/Snowlights/tool/vtrace"
 )
 
 type Pipeline struct {

@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 	"time"
-	"vtool/vlog"
+	"github.com/Snowlights/tool/vlog"
 )
 
 const (

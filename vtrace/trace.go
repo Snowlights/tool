@@ -1,6 +1,7 @@
 package vtrace
 
 import (
+	"github.com/Snowlights/tool/vconfig"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
@@ -8,7 +9,6 @@ import (
 	"os"
 	"strconv"
 	"sync"
-	"vtool/vconfig"
 )
 
 // https://opentracing.io/guides/golang/quick-start/

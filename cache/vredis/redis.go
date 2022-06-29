@@ -3,12 +3,12 @@ package vredis
 import (
 	"context"
 	"fmt"
+	"github.com/Snowlights/tool/cache/vredis/pipeline"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vtrace"
 	"github.com/go-redis/redis"
 	"os"
 	"strings"
-	"vtool/cache/vredis/pipeline"
-	"vtool/vlog"
-	"vtool/vtrace"
 )
 
 type RedisConfig struct {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 // consul agent -vservice -ui -bootstrap-expect=1 -client=0.0.0.0 -bind {ip addr} -data-dir={data dir} >> {log dir}

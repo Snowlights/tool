@@ -1,9 +1,9 @@
 package register
 
 import (
-	"vtool/vservice/common"
-	"vtool/vservice/server/register/etcd"
-	"vtool/vservice/server/register/zk"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vservice/server/register/etcd"
+	"github.com/Snowlights/tool/vservice/server/register/zk"
 )
 
 func GetRegisterEngine(registerConfig *common.RegisterConfig) (common.Register, error) {

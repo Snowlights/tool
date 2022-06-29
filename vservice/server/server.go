@@ -6,8 +6,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"vtool/vlog"
-	"vtool/vservice/common"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 )
 
 var server *Server
