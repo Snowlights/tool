@@ -2,6 +2,7 @@ package breaker
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/Snowlights/tool/parse"
 	"github.com/Snowlights/tool/vconfig"
 	"github.com/Snowlights/tool/vservice/common"
@@ -18,6 +19,12 @@ const (
 	defaultGranularity = time.Second * 1
 	defaultThreshold   = 10
 	defaultBreakerGap  = 10 // seconds
+)
+
+var (
+	ErrTriggerBreaker = func(serv, funcName string) error {
+		return fmt.Errorf("trigger serv breaker, serv info is %s, function is %s", serv, funcName)
+	}
 )
 
 // 计数熔断

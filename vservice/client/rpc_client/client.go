@@ -24,6 +24,8 @@ import (
 	"time"
 )
 
+const clientFuncIndex = 5
+
 type RpcClient struct {
 	client common.Client
 
@@ -161,15 +163,19 @@ func (c *RpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc fun
 	ctx = c.injectServ(ctx)
 	vtrace.SpanFromContent(ctx)
 
+	if !breaker.Entry(c.client.ServName(), c.GetFuncName()) {
+		return breaker.ErrTriggerBreaker(c.client.ServName(), c.GetFuncName())
+	}
+
 	err = fnRpc(ctx, conn.GetConn())
-	breaker.StatBreaker(c.client.ServName(), c.GetFuncName(3), err)
+	breaker.StatBreaker(c.client.ServName(), c.GetFuncName(), err)
 
 	return err
 }
 
-func (c *RpcClient) GetFuncName(index int) string {
+func (c *RpcClient) GetFuncName() string {
 	funcName := ""
-	pc, _, _, ok := runtime.Caller(index)
+	pc, _, _, ok := runtime.Caller(clientFuncIndex)
 	if ok {
 		funcName = runtime.FuncForPC(pc).Name()
 		if index := strings.LastIndex(funcName, "."); index != -1 {
