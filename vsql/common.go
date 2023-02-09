@@ -2,14 +2,14 @@ package vsql
 
 import (
 	"errors"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vtrace"
 	"github.com/apolloconfig/agollo/v4/storage"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pingcap/parser"
 	"github.com/pingcap/parser/ast"
 	_ "github.com/pingcap/tidb/types/parser_driver"
 	"strings"
-	"github.com/Snowlights/tool/vconfig"
-	"github.com/Snowlights/tool/vtrace"
 )
 
 const (

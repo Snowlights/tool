@@ -1,11 +1,11 @@
 package vcollector
 
 import (
+	"github.com/Snowlights/tool/vservice/server/register/consul"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"net/http/pprof"
-	"github.com/Snowlights/tool/vservice/server/register/consul"
 )
 
 //Nerve SD configurations allow retrieving scrape targets from [AirBnB's Nerve]

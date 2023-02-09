@@ -1,12 +1,12 @@
 package server
 
 import (
+	"github.com/Snowlights/tool/vprometheus/metric"
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"testing"
 	"time"
-	"github.com/Snowlights/tool/vprometheus/metric"
 )
 
 type TestProcessor struct{}

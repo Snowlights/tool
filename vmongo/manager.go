@@ -2,6 +2,9 @@ package vmongo
 
 import (
 	"context"
+	"github.com/Snowlights/tool/parse"
+	"github.com/Snowlights/tool/vconfig"
+	"github.com/Snowlights/tool/vtrace"
 	"github.com/apolloconfig/agollo/v4/storage"
 	"github.com/opentracing/opentracing-go"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,9 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 	"sync"
-	"github.com/Snowlights/tool/parse"
-	"github.com/Snowlights/tool/vconfig"
-	"github.com/Snowlights/tool/vtrace"
 )
 
 const (

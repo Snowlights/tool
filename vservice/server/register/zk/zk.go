@@ -1,8 +1,8 @@
 package zk
 
 import (
-	"github.com/samuel/go-zookeeper/zk"
 	"github.com/Snowlights/tool/vservice/common"
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 func NewRegister(regConfig *RegisterConfig) (*Register, error) {

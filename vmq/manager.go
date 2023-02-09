@@ -4,16 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/apolloconfig/agollo/v4/storage"
-	"github.com/opentracing/opentracing-go"
-	"github.com/segmentio/kafka-go"
-	"sync"
-	"time"
 	"github.com/Snowlights/tool/parse"
 	"github.com/Snowlights/tool/vconfig"
 	"github.com/Snowlights/tool/vlog"
 	"github.com/Snowlights/tool/vmq/vkafka"
 	"github.com/Snowlights/tool/vtrace"
+	"github.com/apolloconfig/agollo/v4/storage"
+	"github.com/opentracing/opentracing-go"
+	"github.com/segmentio/kafka-go"
+	"sync"
+	"time"
 )
 
 var defaultManager *Manager

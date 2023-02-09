@@ -3,13 +3,13 @@ package etcd
 import (
 	"context"
 	"encoding/json"
+	"github.com/Snowlights/tool/load_balance/consistent"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"strconv"
 	"strings"
 	"sync"
-	"github.com/Snowlights/tool/load_balance/consistent"
-	"github.com/Snowlights/tool/vlog"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 type Client struct {

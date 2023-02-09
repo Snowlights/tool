@@ -3,9 +3,9 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	"github.com/Snowlights/tool/vtrace"
 	"github.com/go-redis/redis"
 	"strings"
-	"github.com/Snowlights/tool/vtrace"
 )
 
 type Pipeline struct {

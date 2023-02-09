@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap/zapcore"
-	"strconv"
-	"time"
 	"github.com/Snowlights/tool/cache/vredis"
 	"github.com/Snowlights/tool/parse"
 	"github.com/Snowlights/tool/vconfig"
@@ -21,6 +18,9 @@ import (
 	"github.com/Snowlights/tool/vservice/server/register/consul"
 	"github.com/Snowlights/tool/vsql"
 	"github.com/Snowlights/tool/vtrace"
+	"go.uber.org/zap/zapcore"
+	"strconv"
+	"time"
 )
 
 type ServiceBase struct {

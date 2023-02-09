@@ -3,14 +3,14 @@ package etcd
 import (
 	"context"
 	"encoding/json"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/Snowlights/tool/vlog"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 type Register struct {

@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"flag"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/Snowlights/tool/vlog"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 var server *Server

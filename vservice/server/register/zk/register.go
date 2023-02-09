@@ -3,14 +3,14 @@ package zk
 import (
 	"context"
 	"encoding/json"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 	"github.com/samuel/go-zookeeper/zk"
 	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/Snowlights/tool/vlog"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 type Register struct {

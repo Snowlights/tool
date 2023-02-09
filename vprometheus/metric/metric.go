@@ -2,10 +2,10 @@ package metric
 
 import (
 	"context"
-	"time"
 	"github.com/Snowlights/tool/stat/vcpu"
 	"github.com/Snowlights/tool/stat/vload"
 	"github.com/Snowlights/tool/stat/vmemory"
+	"time"
 )
 
 const (

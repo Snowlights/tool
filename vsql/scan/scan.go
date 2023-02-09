@@ -3,8 +3,8 @@ package scan
 import (
 	"database/sql"
 	"errors"
-	"reflect"
 	"github.com/Snowlights/tool/parse"
+	"reflect"
 )
 
 const (

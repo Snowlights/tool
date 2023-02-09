@@ -3,14 +3,14 @@ package vcollector
 import (
 	"context"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
-	"testing"
-	"time"
 	"github.com/Snowlights/tool/vnet"
 	"github.com/Snowlights/tool/vprometheus/vmetric"
 	"github.com/Snowlights/tool/vservice/common"
 	"github.com/Snowlights/tool/vservice/server/register/consul"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net/http"
+	"testing"
+	"time"
 )
 
 func TestNewCollector(t *testing.T) {
