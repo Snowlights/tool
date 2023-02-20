@@ -2,12 +2,12 @@ package common
 
 import (
 	"context"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
 	"github.com/Snowlights/tool/idl/thrift/gen-go/thriftBase"
 	"github.com/Snowlights/tool/vservice/common"
 	"github.com/Snowlights/tool/vservice/server"
 	"github.com/Snowlights/tool/vtrace"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 )
 
 const (

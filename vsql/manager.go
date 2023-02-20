@@ -1,10 +1,10 @@
 package vsql
 
 import (
-	"sync"
-	"time"
 	"github.com/Snowlights/tool/parse"
 	"github.com/Snowlights/tool/vconfig"
+	"sync"
+	"time"
 )
 
 var defaultManager *Manager

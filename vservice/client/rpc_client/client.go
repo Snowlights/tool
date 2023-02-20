@@ -5,12 +5,7 @@ import (
 	"fmt"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	opentrace_go_grpc "github.com/Snowlights/gogrpc"
-	"github.com/opentracing/opentracing-go"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"strconv"
-	"sync"
-	"time"
+	"github.com/Snowlights/tool/breaker"
 	"github.com/Snowlights/tool/parse"
 	"github.com/Snowlights/tool/vconfig"
 	"github.com/Snowlights/tool/vlog"
@@ -19,7 +14,17 @@ import (
 	"github.com/Snowlights/tool/vservice/common"
 	"github.com/Snowlights/tool/vservice/server"
 	"github.com/Snowlights/tool/vtrace"
+	"github.com/opentracing/opentracing-go"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"runtime"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
 )
+
+const clientFuncIndex = 5
 
 type RpcClient struct {
 	client common.Client
@@ -61,6 +66,12 @@ func NewRpcClient(client common.Client, thriftServCli func(thrift.TTransport, th
 	rpcCli.reload()
 	rpcCli.clientPool = pool.NewClientPool(rpcCli.loadClientPoolConfig(client.ServName()), newConnFunc)
 	rpcCli.client.AddPoolHandler(rpcCli.deleteAddrHandler)
+
+	err = breaker.InitBreakerManager(rpcCli.client.ServGroup(), rpcCli.client.ServName())
+	if err != nil {
+		err = nil
+	}
+
 	return rpcCli
 }
 
@@ -152,7 +163,28 @@ func (c *RpcClient) rpc(ctx context.Context, serv *common.ServiceInfo, fnRpc fun
 	ctx = c.injectServ(ctx)
 	vtrace.SpanFromContent(ctx)
 
-	return fnRpc(ctx, conn.GetConn())
+	if !breaker.Entry(c.client.ServName(), c.GetFuncName()) {
+		return breaker.ErrTriggerBreaker(c.client.ServName(), c.GetFuncName())
+	}
+
+	err = fnRpc(ctx, conn.GetConn())
+	breaker.StatBreaker(c.client.ServName(), c.GetFuncName(), err)
+
+	return err
+}
+
+func (c *RpcClient) GetFuncName() string {
+	funcName := ""
+	pc, _, _, ok := runtime.Caller(clientFuncIndex)
+	if ok {
+		funcName = runtime.FuncForPC(pc).Name()
+		if index := strings.LastIndex(funcName, "."); index != -1 {
+			if len(funcName) > index+1 {
+				funcName = funcName[index+1:]
+			}
+		}
+	}
+	return funcName
 }
 
 func (c *RpcClient) injectServ(ctx context.Context) context.Context {

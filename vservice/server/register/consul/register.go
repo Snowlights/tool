@@ -2,12 +2,12 @@ package consul
 
 import (
 	"context"
+	"github.com/Snowlights/tool/vservice/common"
 	"github.com/hashicorp/consul/api"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 // consul agent -vservice -ui -bootstrap-expect=1 -client=0.0.0.0 -bind {ip addr} -data-dir={data dir} >> {log dir}

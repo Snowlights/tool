@@ -21,6 +21,9 @@ const (
 	// client config
 	Client = "client"
 
+	// breaker
+	Breaker = "breaker"
+
 	// middleware config
 	MiddlewareAppID          = "middleware"
 	MiddlewareNamespaceTrace = "trace"

@@ -2,13 +2,13 @@ package vconfig
 
 import (
 	"fmt"
+	"github.com/Snowlights/tool/parse"
 	"github.com/apolloconfig/agollo/v4"
 	"github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/storage"
 	"os"
 	"testing"
 	"time"
-	"github.com/Snowlights/tool/parse"
 )
 
 func TestParseConfigEnv(t *testing.T) {

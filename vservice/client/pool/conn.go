@@ -4,11 +4,11 @@ import (
 	"container/list"
 	"context"
 	"fmt"
-	"sync"
-	"time"
 	"github.com/Snowlights/tool/vconfig"
 	"github.com/Snowlights/tool/vlog"
 	"github.com/Snowlights/tool/vservice/common"
+	"sync"
+	"time"
 )
 
 type ConnPool struct {

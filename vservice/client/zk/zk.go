@@ -3,13 +3,13 @@ package zk
 import (
 	"context"
 	"encoding/json"
+	"github.com/Snowlights/tool/load_balance/consistent"
+	"github.com/Snowlights/tool/vlog"
+	"github.com/Snowlights/tool/vservice/common"
 	"github.com/samuel/go-zookeeper/zk"
 	"strconv"
 	"strings"
 	"sync"
-	"github.com/Snowlights/tool/load_balance/consistent"
-	"github.com/Snowlights/tool/vlog"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 type Client struct {

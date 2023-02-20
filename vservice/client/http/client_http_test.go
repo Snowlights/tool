@@ -2,8 +2,8 @@ package http
 
 import (
 	"fmt"
-	"testing"
 	"github.com/Snowlights/tool/vservice/common"
+	"testing"
 )
 
 func TestHttpClient_Do(t *testing.T) {

@@ -2,9 +2,9 @@ package engine
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/Snowlights/tool/vservice/common"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
-	"github.com/Snowlights/tool/vservice/common"
 )
 
 func GetEnginePower(engine interface{}) (common.EnginePower, bool) {

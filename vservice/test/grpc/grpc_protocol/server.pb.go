@@ -11,6 +11,7 @@ package testService
 
 import (
 	context "context"
+	grpcBase "github.com/Snowlights/tool/idl/grpc/grpcBase"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -19,7 +20,6 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
-	grpcBase "github.com/Snowlights/tool/idl/grpc/grpcBase"
 )
 
 const (

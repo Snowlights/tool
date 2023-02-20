@@ -2,14 +2,14 @@ package http
 
 import (
 	"fmt"
+	"github.com/Snowlights/tool/vprometheus/metric"
+	"github.com/Snowlights/tool/vservice/common"
+	"github.com/Snowlights/tool/vservice/server"
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"testing"
 	"time"
-	"github.com/Snowlights/tool/vprometheus/metric"
-	"github.com/Snowlights/tool/vservice/common"
-	"github.com/Snowlights/tool/vservice/server"
 )
 
 type TestProcessor struct{}

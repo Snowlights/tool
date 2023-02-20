@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"time"
 	"github.com/Snowlights/tool/vlog"
 	clientCommon "github.com/Snowlights/tool/vservice/client/common"
 	"github.com/Snowlights/tool/vservice/common"
 	"github.com/Snowlights/tool/vtrace"
+	"io/ioutil"
+	"net/http"
+	"time"
 )
 
 type HttpClient struct {

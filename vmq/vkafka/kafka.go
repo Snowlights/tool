@@ -3,10 +3,10 @@ package vkafka
 import (
 	"context"
 	"fmt"
+	"github.com/Snowlights/tool/vlog"
 	"log"
 	"strings"
 	"time"
-	"github.com/Snowlights/tool/vlog"
 )
 
 const (

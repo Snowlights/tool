@@ -1,8 +1,8 @@
 package metric
 
 import (
-	"time"
 	"github.com/Snowlights/tool/vprometheus/vmetric"
+	"time"
 )
 
 const (
