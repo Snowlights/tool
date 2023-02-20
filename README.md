@@ -9,6 +9,8 @@
 <details>
 <summary>展开查看</summary>
 <pre><code>.
+│—— breaker: 熔断部分
+    │—— 计数熔断(后续新增滑动窗口或其他方式)
 │—— cache: 缓存部分
     │—— redis
 │—— common 公共依赖
